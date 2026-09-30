@@ -12,6 +12,7 @@ router = APIRouter(prefix="/data-sources", tags=["Data Sources"])
 
 
 @router.get("")
+@router.get("/catalog")
 def list_data_sources(db: Session = Depends(get_db)):
     """
     Returns registered authoritative public datasets and their provenance metadata.
