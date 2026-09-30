@@ -13,6 +13,7 @@ from .reports import router as reports_router
 from .audit import router as audit_router
 from .simulation import router as simulation_router
 from .ai import router as ai_router
+from .data_sources import router as data_sources_router
 
 api_router = APIRouter(prefix="/api")
 
@@ -30,3 +31,5 @@ api_router.include_router(reports_router)
 api_router.include_router(audit_router)
 api_router.include_router(simulation_router)
 api_router.include_router(ai_router)
+api_router.include_router(data_sources_router)
+

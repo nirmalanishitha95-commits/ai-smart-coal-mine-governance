@@ -73,12 +73,36 @@ CoalGuard AI modernizes this process into an **autonomous closed-loop governance
 
 ### 8. Analytics & Dashboards
 * National command center displaying geospatial mine map (Leaflet GIS).
-* Production capacity vs. compliance correlation analysis.
-* State-wise and colliery-type risk distribution metrics.
+* Real-time statutory compliance KPI cards (Active Mines, Overall Compliance Rate, Open Violations, Overdue Actions).
+* Visual risk distribution charts and incident telemetry trend lines.
 
-### 9. Reports & Auditing
-* On-demand export of regulatory compliance dossiers in CSV format.
-* Tamper-evident immutable audit logs capturing every user login, inspection, and status transition with timestamp and IP.
+### 9. Statutory Reports Module
+* **6 Standardized Regulatory Report Types**:
+  1. *Mine Statutory Compliance Report* (`/api/reports/compliance`): Multi-mine regulatory adherence metrics and non-compliance counts.
+  2. *Safety & Statutory Inspection Report* (`/api/reports/inspections`): Checklist items, scoring, inspector certifications, and follow-ups.
+  3. *Regulatory Violations & Penalties Report* (`/api/reports/violations`): CMR citation details, severity rankings, and financial penalty assessments.
+  4. *Corrective & Preventive Action (CAPA) Report* (`/api/reports/corrective-actions`): SLA deadlines, escalation status, and remedial steps.
+  5. *Environmental & Atmospheric Monitoring Report* (`/api/reports/environmental`): Sensor averages, gas threshold excursions, and air quality metrics.
+  6. *AI Risk Assessment & Prioritization Report* (`/api/reports/risk`): Multi-factor risk scores, risk levels, and explainable point breakdown.
+* **In-Memory PDF Generation**: Built using ReportLab to generate official government-styled inspection dossiers in memory (`io.BytesIO()`) without local disk persistence, ensuring 100% compatibility with Render's ephemeral container environment.
+* **Full CSV Export**: Direct raw export of filtered database records for analysis in Excel or statistical packages.
+* **Interactive Preview**: In-browser data table preview with responsive pagination and KPI summary chips.
+
+### 10. Authoritative Public Datasets & Data Provenance Policy
+CoalGuard AI strictly complies with high standards of data integrity and provenance. **No government statistics are fabricated, and simulated telemetry is never conflated with real historical data.**
+
+* **Real Public Datasets Integrated**:
+  - **Ministry of Coal (MoC)**: Colliery registry, mine ownership (CIL subsidiaries: BCCL, CCL, ECL, SECL, WCL, MCL, NCL, SCCL), operational types (Underground vs. Opencast), and geographical coordinates.
+  - **Coal Controller’s Organisation (CCO)**: *Provisional Coal Statistics 2022-23* covering colliery-level coal production, coking vs. non-coking breakdown, and offtake/despatch volumes.
+  - **Directorate General of Mines Safety (DGMS)**: *Standard Safety Statistics & Annual Returns (2018–2023)* detailing national and mine-level fatal and serious accidents, rates per 1,000 workers employed, and rates per million tonnes (MT) of coal extracted.
+  - **Central Pollution Control Board (CPCB)**: *National Ambient Air Quality Standards (NAAQS)* for coal mining areas.
+* **Data Provenance Labels**:
+  - `Historical Government Data`: Assigned to all authentic datasets imported from CCO, DGMS, and Ministry of Coal, citing source URL and publication period.
+  - `DEMO IoT STREAM`: Clearly labeled on simulated real-time multi-gas sensor feeds.
+  - `LIVE IoT DATA`: Supported architecture for seamless switching when authorized SCADA/IoT edge gateways are linked.
+* **AI Disclaimer**: All AI risk scores and recommendations explicitly state: *"AI-assisted prototype assessment. Not an official regulatory decision."*
+* **Dedicated Data Sources Catalog (`/data-sources`)**:
+  - In-app interactive portal displaying the metadata, source organization, source URLs, publication periods, record counts, and last sync timestamp for all authoritative datasets.
 
 ---
 
@@ -87,7 +111,7 @@ CoalGuard AI modernizes this process into an **autonomous closed-loop governance
 | Layer | Technologies |
 | :--- | :--- |
 | **Frontend** | React 18, Vite, React Router v7, Recharts, Leaflet, React Leaflet, Lucide Icons, Vanilla CSS |
-| **Backend** | Python 3.11/3.14, FastAPI, Uvicorn, SQLAlchemy 2.0, Pydantic v2, PyJWT, Passlib (PBKDF2 HMAC SHA-256) |
+| **Backend** | Python 3.11/3.14, FastAPI, Uvicorn, SQLAlchemy 2.0, Pydantic v2, PyJWT, Passlib, ReportLab |
 | **Database** | PostgreSQL 16 (Render Managed PostgreSQL), SQLite (Local Fallback) |
 | **AI / ML** | Groq API (`llama-3.3-70b-versatile`), Scikit-Learn Isolation Forest, NumPy, Pandas |
 | **Deployment** | Render Web Service (FastAPI), Render Static Site (React SPA), Render PostgreSQL |
@@ -144,7 +168,7 @@ coalguard-ai/
 │   │   │   ├── anomaly_detector.py      # Isolation Forest Anomaly Detector
 │   │   │   ├── risk_engine.py           # Multi-Factor Explainable Risk Scoring
 │   │   │   └── simulation_service.py    # 14-Step Autonomous Governance Loop
-│   │   ├── api/                         # 13 Modular REST API Routers
+│   │   ├── api/                         # 14 Modular REST API Routers
 │   │   │   ├── auth.py                  # JWT Login, Register, Role Verification
 │   │   │   ├── mines.py                 # Mine CRUD, GIS Coordinates, Risk Scores
 │   │   │   ├── sensors.py               # IoT Telemetry Ingestion & WebSockets
@@ -153,13 +177,14 @@ coalguard-ai/
 │   │   │   ├── violations.py            # Regulatory Notices & Severities
 │   │   │   ├── actions.py               # CAPA Remedial Action Plans
 │   │   │   ├── alerts.py                # Early Warning Alert Center
-│   │   │   ├── reports.py               # Dossier Summaries & CSV Exports
+│   │   │   ├── reports.py               # Dossier Summaries, In-Memory PDF & CSV Exports
+│   │   │   ├── data_sources.py          # Authoritative Public Datasets & Registry
 │   │   │   ├── ai.py                    # Groq Copilot & Mine Analysis
 │   │   │   └── audit.py                 # Immutable Audit Log Trail
 │   │   ├── database/                    # SQLAlchemy Engine & PostgreSQL Session
-│   │   ├── models/                      # 17 Relational ORM Models
+│   │   ├── models/                      # 21 Relational ORM Models
 │   │   ├── schemas/                     # Pydantic Request & Response Models
-│   │   ├── services/                    # Seed Service, Groq Service, Audit Helper
+│   │   ├── services/                    # Seed Service, PDF Report Service, Groq Service
 │   │   ├── config.py                    # Dynamic Settings & Environment Variables
 │   │   └── main.py                      # Re-exporting app for Render Uvicorn
 │   ├── .env.example                     # Backend environment template
@@ -175,17 +200,18 @@ coalguard-ai/
 │   │   ├── components/                  # Navbar, Sidebar, AICopilotModal, Badges
 │   │   ├── context/                     # AuthContext with 1-click Demo Role Switcher
 │   │   ├── layouts/                     # DashboardLayout with Responsive Navigation
-│   │   ├── pages/                       # 13 Complete Feature Pages
+│   │   ├── pages/                       # 14 Complete Feature Pages
 │   │   │   ├── DashboardPage.jsx        # National Command Map & Overview KPIs
 │   │   │   ├── MinesPage.jsx            # All Mines Table & Filter
 │   │   │   ├── MineDetailPage.jsx       # Detailed Mine Telemetry & Dossier
-│   │   │   ├── LiveSensorsPage.jsx      # Multi-Gas IoT Telemetry Stream
+│   │   │   ├── LiveSensorsPage.jsx      # Multi-Gas IoT Telemetry Stream (DEMO IoT STREAM)
 │   │   │   ├── CompliancePage.jsx       # Statutory Regulations & Audits
 │   │   │   ├── InspectionsPage.jsx      # Digital Inspection Management
 │   │   │   ├── ViolationsPage.jsx       # Violation Registry & Notice Tracking
 │   │   │   ├── CorrectiveActionsPage.jsx# CAPA Plans & Verification
 │   │   │   ├── AlertsPage.jsx           # Hazard & Early Warning Alert Center
-│   │   │   ├── ReportsPage.jsx          # Analytics & CSV Export
+│   │   │   ├── ReportsPage.jsx          # Statutory Reports, In-Memory PDF & CSV Export
+│   │   │   ├── DataSourcesPage.jsx      # Authoritative Public Datasets Catalog
 │   │   │   ├── AuditLogsPage.jsx        # Tamper-Evident System Audit Trail
 │   │   │   ├── SimulationPage.jsx       # 14-Step AI Simulation Runner
 │   │   │   └── LoginPage.jsx            # User Authentication Portal
@@ -301,7 +327,7 @@ Open your browser at `http://localhost:5173`.
 ```bash
 python test_backend.py
 ```
-Validates all 9 critical subsystems: Health checks, JWT auth across 4 roles, mine risk scoring, Isolation Forest anomaly ML, alerts, 14-step simulation, CSV reports, and Groq AI fallback.
+Validates all 10 critical subsystems: Health checks, JWT auth across 4 roles, mine risk scoring, Isolation Forest anomaly ML, alerts, 14-step simulation, Reports module (6 types, in-memory ReportLab PDF, CSV), Groq AI fallback, and Authoritative Public Datasets & Data Provenance Standards.
 
 ---
 

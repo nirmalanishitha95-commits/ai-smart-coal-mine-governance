@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard, Activity, Mountain, ShieldCheck, ClipboardCheck,
   AlertOctagon, CheckSquare, Bell, BarChart3, FileText, History,
-  MapPin, Cpu, Shield, Settings, Users, X
+  MapPin, Cpu, Shield, Settings, Users, X, Database
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
@@ -27,11 +27,13 @@ export default function Sidebar({ isOpen, onClose, onOpenSimulation }) {
     { name: "Alerts", path: "/alerts", icon: Bell, visible: true },
     { name: "Interactive Map", path: "/map", icon: MapPin, visible: true },
     { name: "Analytics", path: "/analytics", icon: BarChart3, visible: isGovOfficer },
-    { name: "Reports", path: "/reports", icon: FileText, visible: isGovOfficer || isMineManager },
+    { name: "Reports", path: "/reports", icon: FileText, visible: true },
+    { name: "Data Sources", path: "/data-sources", icon: Database, visible: true },
     { name: "Audit Logs", path: "/audit-logs", icon: History, visible: isSuperAdmin || isGovOfficer },
     { name: "Users", path: "/users", icon: Users, visible: true },
     { name: "Settings", path: "/settings", icon: Settings, visible: true },
   ];
+
 
   return (
     <>

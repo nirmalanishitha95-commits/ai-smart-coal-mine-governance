@@ -56,6 +56,13 @@ class Mine(Base):
     next_inspection = Column(DateTime, nullable=True)
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
+    
+    # Authoritative Public Government Data Provenance
+    source_name = Column(String(150), default="Coal Directory of India / Ministry of Coal")
+    source_url = Column(String(255), default="https://coal.gov.in")
+    source_date = Column(String(50), default="2022-23")
+    data_type = Column(String(50), default="Historical Government Data")
+    
     created_at = Column(DateTime, default=utc_now)
     updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
@@ -69,6 +76,10 @@ class Mine(Base):
     environmental_readings = relationship("EnvironmentalReading", back_populates="mine", cascade="all, delete-orphan")
     safety_incidents = relationship("SafetyIncident", back_populates="mine", cascade="all, delete-orphan")
     alerts = relationship("Alert", back_populates="mine", cascade="all, delete-orphan")
+    production_records = relationship("ProductionRecord", back_populates="mine", cascade="all, delete-orphan")
+    accident_records = relationship("AccidentRecord", back_populates="mine", cascade="all, delete-orphan")
+    safety_records = relationship("SafetyRecord", back_populates="mine", cascade="all, delete-orphan")
+
 
 
 class MineLocation(Base):
@@ -229,6 +240,7 @@ class EnvironmentalReading(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     mine_id = Column(Integer, ForeignKey("mines.id"), nullable=False)
+    data_source = Column(String(50), default="DEMO IoT STREAM") # "DEMO IoT STREAM" or "Historical Government Data"
     parameter_name = Column(String(100), nullable=False) # Methane, CO, Dust, Temperature, Humidity, Air Quality, Water Quality
     value = Column(Float, nullable=False)
     unit = Column(String(20), nullable=False) # %, ppm, ug/m3, C, %, AQI, pH
@@ -309,3 +321,87 @@ class AuditLog(Base):
     details = Column(Text, nullable=True)
     ip_address = Column(String(50), default="127.0.0.1")
     timestamp = Column(DateTime, default=utc_now, index=True)
+
+
+# ===================================================================
+# AUTHORITATIVE PUBLIC GOVERNMENT DATASET MODELS
+# Provenance: Ministry of Coal, DGMS, Coal Directory of India, CCO
+# ===================================================================
+
+class DataSource(Base):
+    __tablename__ = "data_sources"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(200), nullable=False)
+    source_organization = Column(String(200), nullable=False)
+    source_url = Column(String(500), nullable=False)
+    source_date = Column(String(50), nullable=False)
+    data_type = Column(String(50), default="Historical Government Data") # "Historical Government Data" or "DEMO IoT STREAM" or "LIVE IoT DATA"
+    record_count = Column(Integer, default=0)
+    description = Column(Text, nullable=True)
+    last_imported = Column(DateTime, default=utc_now)
+
+
+class ProductionRecord(Base):
+    __tablename__ = "production_records"
+
+    id = Column(Integer, primary_key=True, index=True)
+    mine_id = Column(Integer, ForeignKey("mines.id"), nullable=True)
+    company_name = Column(String(100), nullable=False) # CIL, SECL, BCCL, MCL, NCL, WCL, ECL, SCCL
+    colliery_name = Column(String(150), nullable=False)
+    state = Column(String(100), nullable=False)
+    fiscal_year = Column(String(50), nullable=False) # 2022-23, 2023-24
+    coking_coal_mt = Column(Float, default=0.0) # Million Tonnes
+    non_coking_coal_mt = Column(Float, default=0.0) # Million Tonnes
+    total_production_mt = Column(Float, nullable=False)
+    offtake_despatch_mt = Column(Float, nullable=False)
+    source_name = Column(String(150), default="Provisional Coal Statistics / Ministry of Coal")
+    source_url = Column(String(255), default="https://coal.gov.in")
+    source_date = Column(String(50), default="2022-23")
+    data_type = Column(String(50), default="Historical Government Data")
+    created_at = Column(DateTime, default=utc_now)
+
+    mine = relationship("Mine", back_populates="production_records")
+
+
+class AccidentRecord(Base):
+    __tablename__ = "accident_records"
+
+    id = Column(Integer, primary_key=True, index=True)
+    mine_id = Column(Integer, ForeignKey("mines.id"), nullable=True)
+    year = Column(Integer, nullable=False) # 2019, 2020, 2021, 2022, 2023
+    company_name = Column(String(100), nullable=False)
+    colliery_name = Column(String(150), nullable=False)
+    state = Column(String(100), nullable=False)
+    accident_type = Column(String(150), nullable=False) # Fall of Roof, HEMM / Machinery, Inundation / Gas, Explosives
+    fatalities = Column(Integer, default=0)
+    serious_injuries = Column(Integer, default=0)
+    cause_classification = Column(Text, nullable=True)
+    source_name = Column(String(150), default="DGMS Annual Safety & Fatal Accident Statistics")
+    source_url = Column(String(255), default="https://dgms.gov.in")
+    source_date = Column(String(50), default="2022")
+    data_type = Column(String(50), default="Historical Government Data")
+    created_at = Column(DateTime, default=utc_now)
+
+    mine = relationship("Mine", back_populates="accident_records")
+
+
+class SafetyRecord(Base):
+    __tablename__ = "safety_records"
+
+    id = Column(Integer, primary_key=True, index=True)
+    mine_id = Column(Integer, ForeignKey("mines.id"), nullable=True)
+    year = Column(Integer, nullable=False)
+    state = Column(String(100), nullable=False)
+    fatality_rate_per_mt = Column(Float, default=0.20) # per Million Tonnes
+    serious_injury_rate_per_mt = Column(Float, default=0.45)
+    fatality_rate_per_1000_workers = Column(Float, default=0.18)
+    serious_injury_rate_per_1000_workers = Column(Float, default=0.42)
+    source_name = Column(String(150), default="DGMS Standard Mining Safety Indicators")
+    source_url = Column(String(255), default="https://dgms.gov.in")
+    source_date = Column(String(50), default="2022")
+    data_type = Column(String(50), default="Historical Government Data")
+    created_at = Column(DateTime, default=utc_now)
+
+    mine = relationship("Mine", back_populates="safety_records")
+

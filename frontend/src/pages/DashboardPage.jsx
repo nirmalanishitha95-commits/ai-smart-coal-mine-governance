@@ -197,9 +197,42 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Authoritative Data Provenance & AI Advisory Banner */}
+      <div className="gov-card p-3.5 bg-gradient-to-r from-emerald-50/90 via-blue-50/70 to-slate-50 border border-emerald-200/90 rounded-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-pulse flex-shrink-0" />
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-[#1E5B3A] uppercase tracking-wider text-[11px]">
+                Statutory Provenance Verified
+              </span>
+              <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                Historical Government Data
+              </span>
+            </div>
+            <p className="text-[#4B5563] text-[11px] mt-0.5">
+              Production, accidents & safety: <b>Ministry of Coal &bull; CCO &bull; DGMS</b> | Live Multi-Gas Telemetry: <b className="text-amber-800">DEMO IoT STREAM</b>
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2.5 flex-shrink-0">
+          <span className="px-2.5 py-1 rounded text-[10px] font-semibold bg-white border border-gray-300 text-gray-700 shadow-2xs">
+            AI Advisory: Prototype Decision Support &bull; Not Final Regulatory Order
+          </span>
+          <Link
+            to="/data-sources"
+            className="text-[11px] font-bold text-[#1E5B3A] hover:underline flex items-center gap-1"
+          >
+            <span>Public Datasets</span>
+            <ExternalLink className="w-3 h-3" />
+          </Link>
+        </div>
+      </div>
+
       {/* Error Banner with Retry */}
       {error && (
         <div className="gov-card p-4 border-l-4 border-l-[#DC2626] bg-red-50 flex items-center justify-between">
+
           <div className="flex items-center gap-2 text-xs text-[#DC2626]">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>

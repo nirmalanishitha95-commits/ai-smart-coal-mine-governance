@@ -95,6 +95,25 @@ def get_current_user(
         )
     return user
 
+def get_current_user_optional(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    db: Session = Depends(get_db)
+) -> Optional[User]:
+    """Gracefully extracts authenticated user if token present, or returns None without failing."""
+    if not credentials:
+        return None
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        user_id = payload.get("sub")
+        if user_id:
+            user = db.query(User).filter(User.id == int(user_id)).first()
+            if user and user.is_active:
+                return user
+    except Exception:
+        pass
+    return None
+
 def require_roles(allowed_roles: List[str]):
     def role_checker(current_user: User = Depends(get_current_user)) -> User:
         user_role = current_user.role.name if current_user.role else ""
@@ -105,3 +124,4 @@ def require_roles(allowed_roles: List[str]):
             )
         return current_user
     return role_checker
+

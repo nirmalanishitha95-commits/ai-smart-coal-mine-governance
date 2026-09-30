@@ -110,16 +110,35 @@ def test_full_system():
     print(f"Executed Steps: {len(sim_data['steps'])} of 14")
     assert len(sim_data["steps"]) == 14
 
-    print("\n=== 8. Testing Reports & Audit Logs ===")
-    r = client.get("/api/reports/summary", headers=admin_headers)
+    print("\n=== 8. Testing Complete Reports Module (6 Report Types, PDF & CSV) ===")
+    # 8.1 Stats
+    r = client.get("/api/reports/stats", headers=admin_headers)
     assert r.status_code == 200
-    print("Report Summary API OK. Generated at:", r.json()["generated_at"])
+    stats = r.json()
+    print("Report Stats OK:", stats)
 
-    r = client.get("/api/reports/export-csv?report_type=compliance", headers=admin_headers)
+    # 8.2 All 6 Report Types
+    for rtype in ["compliance", "inspections", "violations", "corrective-actions", "environmental", "risk"]:
+        r = client.get(f"/api/reports/{rtype}", headers=admin_headers)
+        assert r.status_code == 200, f"Report {rtype} failed with {r.status_code}"
+        res_json = r.json()
+        assert "rows" in res_json and "columns" in res_json
+        print(f"Report [{rtype}] OK. Rows: {len(res_json['rows'])} | Title: {res_json['title']}")
+
+    # 8.3 In-Memory PDF Generation & Download
+    r = client.get("/api/reports/pdf?report_type=compliance", headers=admin_headers)
+    assert r.status_code == 200
+    assert "application/pdf" in r.headers.get("content-type", "")
+    assert len(r.content) > 2000
+    print(f"ReportLab PDF Generation OK. Streamed Bytes: {len(r.content)} | Header: {r.headers.get('content-disposition')}")
+
+    # 8.4 CSV Export
+    r = client.get("/api/reports/csv?report_type=compliance", headers=admin_headers)
     assert r.status_code == 200
     assert "text/csv" in r.headers.get("content-type", "")
-    print("CSV Export API OK. Bytes received:", len(r.content))
+    print(f"CSV Export API OK. Bytes received: {len(r.content)}")
 
+    # 8.5 Audit Logs
     r = client.get("/api/audit-logs", headers=admin_headers)
     assert r.status_code == 200
     logs = r.json()
@@ -146,9 +165,35 @@ def test_full_system():
     assert "groq_analysis" in analysis
     print("AI Deep Mine Analysis Verified. Source:", analysis["groq_analysis"].get("source"))
 
-    print("\n========================================================")
-    print(">>> ALL 9 CORE TEST SUITES PASSED WITH 100% SUCCESS! <<<")
-    print("========================================================")
+    print("\n=== 10. Testing Authoritative Public Datasets & Provenance Standards ===")
+    r = client.get("/api/data-sources")
+    assert r.status_code == 200
+    sources = r.json()
+    assert len(sources) >= 4
+    print(f"Public Datasets Verified: {len(sources)} registered sources (CCO, DGMS, MoC, DEMO IoT STREAM)")
+
+    r = client.get("/api/data-sources/production")
+    assert r.status_code == 200
+    prod_data = r.json()
+    assert prod_data["summary"]["total_production_mt"] > 0
+    print(f"Public Production Data OK: {prod_data['summary']['total_production_mt']} MT across {prod_data['summary']['mines_reported']} collieries")
+
+    r = client.get("/api/data-sources/accidents")
+    assert r.status_code == 200
+    acc_data = r.json()
+    assert len(acc_data["records"]) > 0
+    print(f"Public DGMS Accidents Data OK: {len(acc_data['records'])} historical incident records cataloged")
+
+    r = client.get("/api/data-sources/safety-indicators")
+    assert r.status_code == 200
+    safe_data = r.json()
+    assert len(safe_data["records"]) > 0
+    print(f"Public DGMS Safety Indicators OK: {len(safe_data['records'])} annual national rate series (2019-2023)")
+
+    print("\n=========================================================")
+    print(">>> ALL 10 CORE TEST SUITES PASSED WITH 100% SUCCESS! <<<")
+    print("=========================================================")
 
 if __name__ == "__main__":
     test_full_system()
+

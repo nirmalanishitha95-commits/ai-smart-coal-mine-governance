@@ -116,11 +116,62 @@ export const analyticsService = {
 };
 
 export const reportService = {
+  getStats: () => api.get("/reports/stats"),
   getSummary: (params) => api.get("/reports/summary", { params }),
-  getExportCsvUrl: (reportType = "compliance", mineId = null, status = null) => {
+  getCompliance: (params) => api.get("/reports/compliance", { params }),
+  getInspections: (params) => api.get("/reports/inspections", { params }),
+  getViolations: (params) => api.get("/reports/violations", { params }),
+  getCorrectiveActions: (params) => api.get("/reports/corrective-actions", { params }),
+  getEnvironmental: (params) => api.get("/reports/environmental", { params }),
+  getRisk: (params) => api.get("/reports/risk", { params }),
+  downloadPdf: async (params) => {
+    const res = await api.get("/reports/pdf", { params, responseType: "blob" });
+    const blob = new Blob([res.data], { type: "application/pdf" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    const disposition = res.headers["content-disposition"] || "";
+    let filename = `coalguard_${params.report_type || "report"}_${new Date().toISOString().slice(0, 10)}.pdf`;
+    const match = disposition.match(/filename="?([^";]+)"?/);
+    if (match && match[1]) filename = match[1];
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    return true;
+  },
+  downloadCsv: async (params) => {
+    const res = await api.get("/reports/csv", { params, responseType: "blob" });
+    const blob = new Blob([res.data], { type: "text/csv;charset=utf-8;" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    const disposition = res.headers["content-disposition"] || "";
+    let filename = `coalguard_${params.report_type || "report"}_${new Date().toISOString().slice(0, 10)}.csv`;
+    const match = disposition.match(/filename="?([^";]+)"?/);
+    if (match && match[1]) filename = match[1];
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    return true;
+  },
+  getExportCsvUrl: (reportType = "compliance", mineId = null, status = null, startDate = null, endDate = null) => {
     let url = `${API_URL}/reports/export-csv?report_type=${reportType}`;
     if (mineId) url += `&mine_id=${mineId}`;
     if (status) url += `&status=${status}`;
+    if (startDate) url += `&start_date=${startDate}`;
+    if (endDate) url += `&end_date=${endDate}`;
+    return url;
+  },
+  getExportPdfUrl: (reportType = "compliance", mineId = null, status = null, startDate = null, endDate = null) => {
+    let url = `${API_URL}/reports/pdf?report_type=${reportType}`;
+    if (mineId) url += `&mine_id=${mineId}`;
+    if (status) url += `&status=${status}`;
+    if (startDate) url += `&start_date=${startDate}`;
+    if (endDate) url += `&end_date=${endDate}`;
     return url;
   },
 };
@@ -145,4 +196,12 @@ export const aiService = {
   getMineAnalysis: (mineId) => api.post(`/ai/mine-analysis/${mineId}`),
 };
 
+export const dataSourceService = {
+  getAll: () => api.get("/data-sources"),
+  getProduction: (params) => api.get("/data-sources/production", { params }),
+  getAccidents: (params) => api.get("/data-sources/accidents", { params }),
+  getSafetyIndicators: () => api.get("/data-sources/safety-indicators"),
+};
+
 export default api;
+

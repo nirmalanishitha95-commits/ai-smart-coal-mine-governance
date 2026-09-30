@@ -20,6 +20,7 @@ import SimulationPage from "./pages/SimulationPage";
 import MineDetailPage from "./pages/MineDetailPage";
 import UsersPage from "./pages/UsersPage";
 import SettingsPage from "./pages/SettingsPage";
+import DataSourcesPage from "./pages/DataSourcesPage";
 
 export default function App() {
   return (
@@ -46,11 +47,13 @@ export default function App() {
             <Route path="/map" element={<MapPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
+            <Route path="/data-sources" element={<DataSourcesPage />} />
             <Route path="/audit-logs" element={<AuditLogsPage />} />
             <Route path="/users" element={<UsersPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/simulation" element={<SimulationPage />} />
           </Route>
+
 
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />
