@@ -63,8 +63,8 @@ def verify_all():
 
     # 7. Live Sensor Telemetry (11 Safety Parameters)
     code, res = fetch_json(f"{RENDER_BACKEND}/api/sensors/live-table")
-    sensor_count = len(res.get("sensors", [])) if isinstance(res, dict) else 0
-    print(f"7. Live Sensors [{code}]: {sensor_count} underground sensor nodes streaming ({res.get('data_source')})")
+    sensor_count = len(res) if isinstance(res, list) else 0
+    print(f"7. Live Sensors [{code}]: {sensor_count} underground sensor nodes streaming (DEMO IoT STREAM)")
 
     # 8. Alerts
     code, res = fetch_json(f"{RENDER_BACKEND}/api/alerts?limit=100")
@@ -73,8 +73,8 @@ def verify_all():
 
     # 9. Dashboard KPIs
     code, res = fetch_json(f"{RENDER_BACKEND}/api/dashboard")
-    summary = res.get("summary", {}) if isinstance(res, dict) else {}
-    print(f"9. Dashboard KPIs [{code}]: Active Mines={summary.get('active_underground_mines')}, Workers={summary.get('workers_monitored')}, Hazards={summary.get('active_hazards')}, Alerts={summary.get('critical_alerts')}")
+    kpis = res.get("kpis", {}) if isinstance(res, dict) else {}
+    print(f"9. Dashboard KPIs [{code}]: Active Mines={kpis.get('active_underground_mines', {}).get('value')}, Workers={kpis.get('workers_monitored', {}).get('value')}, Hazards={kpis.get('active_hazards', {}).get('value')}, Alerts={kpis.get('critical_alerts', {}).get('value')}")
 
     # 10. Public Data Sources (authoritative datasets intact)
     code, res = fetch_json(f"{RENDER_BACKEND}/api/data-sources")
