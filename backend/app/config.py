@@ -21,8 +21,8 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
     
     # Frontend URL & CORS
-    # In Render production, FRONTEND_URL is set to e.g. https://coalguard-frontend.onrender.com
-    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "")
+    # Automatically allows the deployed Render frontend URL and custom domains
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "https://ai-smart-coal-mine-frontend.onrender.com")
     CORS_ORIGINS: str = os.getenv("CORS_ORIGINS", "")
     
     # Groq AI Settings
@@ -36,14 +36,22 @@ class Settings(BaseSettings):
 
     @property
     def cors_origin_list(self) -> List[str]:
-        origins = set()
+        # Always allow deployed Render frontend and local development origins
+        origins = {
+            "https://ai-smart-coal-mine-frontend.onrender.com",
+            "http://ai-smart-coal-mine-frontend.onrender.com",
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:5173",
+            "http://127.0.0.1:3000"
+        }
         
         # Add configured FRONTEND_URL
         if self.FRONTEND_URL:
             clean_frontend = self.FRONTEND_URL.strip().rstrip("/")
             if clean_frontend:
                 origins.add(clean_frontend)
-                # Also include https/http variant if needed
+                # Also include https/http variant
                 if clean_frontend.startswith("http://"):
                     origins.add(clean_frontend.replace("http://", "https://", 1))
                 elif clean_frontend.startswith("https://"):
@@ -56,15 +64,6 @@ class Settings(BaseSettings):
                 if cleaned:
                     origins.add(cleaned)
                     
-        # In non-production or if no origins specified, include local dev ports
-        if self.ENVIRONMENT != "production" or not origins:
-            origins.update([
-                "http://localhost:5173",
-                "http://localhost:3000",
-                "http://127.0.0.1:5173",
-                "http://127.0.0.1:3000"
-            ])
-            
         return list(origins)
 
     class Config:

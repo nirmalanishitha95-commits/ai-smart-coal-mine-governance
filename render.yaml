@@ -35,10 +35,7 @@ services:
           name: coalguard-postgres
           property: connectionString
       - key: FRONTEND_URL
-        fromService:
-          type: web
-          name: coalguard-frontend
-          property: host
+        value: https://ai-smart-coal-mine-frontend.onrender.com
       - key: JWT_SECRET
         generateValue: true
       - key: GROQ_API_KEY
@@ -65,7 +62,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: coalguard-api
-          property: host
+        value: https://ai-smart-coal-mine-governance.onrender.com

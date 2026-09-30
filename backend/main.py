@@ -60,13 +60,14 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS configuration - dynamically binds FRONTEND_URL from Render environment
+# CORS configuration - dynamically binds FRONTEND_URL and allows all Render subdomains
 allow_origins = settings.cors_origin_list
 print(f"Configured CORS origins: {allow_origins}")
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
+    allow_origin_regex=r"^https?://.*\.onrender\.com$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

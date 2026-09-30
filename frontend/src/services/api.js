@@ -2,7 +2,11 @@ import axios from "axios";
 
 // Render Production API URL Configuration
 // Resolves from VITE_API_URL environment variable configured on Render
-const rawApiUrl = (import.meta.env.VITE_API_URL || "").trim().replace(/\/+$/, "");
+// Fallback directly to deployed Render backend: https://ai-smart-coal-mine-governance.onrender.com
+const DEFAULT_PROD_API = "https://ai-smart-coal-mine-governance.onrender.com";
+const envApiUrl = (import.meta.env.VITE_API_URL || "").trim().replace(/\/+$/, "");
+const rawApiUrl = envApiUrl || (import.meta.env.PROD ? DEFAULT_PROD_API : "");
+
 export const API_URL = rawApiUrl 
   ? (rawApiUrl.endsWith("/api") ? rawApiUrl : `${rawApiUrl}/api`)
   : "/api";

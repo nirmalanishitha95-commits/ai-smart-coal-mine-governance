@@ -9,18 +9,11 @@ from backend.app.models.models import (
 )
 from backend.app.services.auth_service import hash_password
 
-def seed_database_if_empty(db: Session):
-    # Ensure authoritative public datasets are synchronized
-    seed_public_datasets_if_needed(db)
-
-    # Check if core database already seeded
-    if db.query(Mine).count() >= 10:
-        return
-
-
-    now = datetime.datetime.now(datetime.timezone.utc)
-
-    # 1. Seed Roles
+def seed_roles_and_users_if_needed(db: Session):
+    """
+    Guarantees that the 4 statutory roles and demo user accounts always exist in PostgreSQL/SQLite,
+    regardless of whether mines or other collections are already seeded.
+    """
     roles_data = [
         {"name": "SUPER_ADMIN", "description": "National Coal Controller and System Administrator"},
         {"name": "GOVERNMENT_OFFICER", "description": "DGMS Regional & District Mining Officer"},
@@ -36,6 +29,76 @@ def seed_database_if_empty(db: Session):
             db.commit()
             db.refresh(role)
         role_map[r["name"]] = role
+
+    first_mine = db.query(Mine).first()
+    first_mine_id = first_mine.id if first_mine else None
+
+    demo_users = [
+        {
+            "name": "National Coal Controller (Admin)",
+            "email": "admin@coalguard.gov.in",
+            "password": "Admin@123",
+            "role": "SUPER_ADMIN",
+            "designation": "Director General of Mine Safety"
+        },
+        {
+            "name": "Er. Rajesh Kumar",
+            "email": "officer@coalguard.gov.in",
+            "password": "Officer@123",
+            "role": "GOVERNMENT_OFFICER",
+            "designation": "Regional Mining Officer - DGMS"
+        },
+        {
+            "name": "S. K. Mukherjee",
+            "email": "manager@coalguard.gov.in",
+            "password": "Manager@123",
+            "role": "MINE_MANAGER",
+            "mine_id": first_mine_id,
+            "designation": "General Manager (Operations)"
+        },
+        {
+            "name": "Amitabh Sen",
+            "email": "inspector@coalguard.gov.in",
+            "password": "Inspector@123",
+            "role": "INSPECTOR",
+            "designation": "Statutory Mine Safety Inspector"
+        }
+    ]
+
+    for u in demo_users:
+        user = db.query(User).filter(User.email == u["email"]).first()
+        if not user:
+            user = User(
+                name=u["name"],
+                email=u["email"],
+                hashed_password=hash_password(u["password"]),
+                role_id=role_map[u["role"]].id,
+                mine_id=u.get("mine_id"),
+                designation=u.get("designation"),
+                phone="+91-9876543210",
+                is_active=True
+            )
+            db.add(user)
+        else:
+            if not user.is_active:
+                user.is_active = True
+            if not user.role_id and u["role"] in role_map:
+                user.role_id = role_map[u["role"]].id
+            if u["role"] == "MINE_MANAGER" and not user.mine_id and first_mine_id:
+                user.mine_id = first_mine_id
+    db.commit()
+    return role_map
+
+def seed_database_if_empty(db: Session):
+    # Ensure authoritative public datasets are synchronized
+    seed_public_datasets_if_needed(db)
+
+    # Ensure statutory roles and 4 demo accounts always exist
+    role_map = seed_roles_and_users_if_needed(db)
+
+    # Check if core database already seeded
+    if db.query(Mine).count() >= 10:
+        return
 
     # 2. Seed 10 Realistic Mines (Indian Coal Mining Belts: Jharkhand, Chhattisgarh, Odisha, MP, WB)
     mines_seed = [
@@ -220,52 +283,7 @@ def seed_database_if_empty(db: Session):
             created_mines.append(existing)
 
     # 3. Seed Demo Users
-    demo_users = [
-        {
-            "name": "National Coal Controller (Admin)",
-            "email": "admin@coalguard.gov.in",
-            "password": "Admin@123",
-            "role": "SUPER_ADMIN",
-            "designation": "Director General of Mine Safety"
-        },
-        {
-            "name": "Er. Rajesh Kumar",
-            "email": "officer@coalguard.gov.in",
-            "password": "Officer@123",
-            "role": "GOVERNMENT_OFFICER",
-            "designation": "Regional Mining Officer - DGMS"
-        },
-        {
-            "name": "S. K. Mukherjee",
-            "email": "manager@coalguard.gov.in",
-            "password": "Manager@123",
-            "role": "MINE_MANAGER",
-            "mine_id": created_mines[0].id,
-            "designation": "General Manager (Operations)"
-        },
-        {
-            "name": "Amitabh Sen",
-            "email": "inspector@coalguard.gov.in",
-            "password": "Inspector@123",
-            "role": "INSPECTOR",
-            "designation": "Statutory Mine Safety Inspector"
-        }
-    ]
-
-    for u in demo_users:
-        if not db.query(User).filter(User.email == u["email"]).first():
-            user = User(
-                name=u["name"],
-                email=u["email"],
-                hashed_password=hash_password(u["password"]),
-                role_id=role_map[u["role"]].id,
-                mine_id=u.get("mine_id"),
-                designation=u.get("designation"),
-                phone="+91-9876543210",
-                is_active=True
-            )
-            db.add(user)
-    db.commit()
+    seed_roles_and_users_if_needed(db)
 
     # 4. Seed Compliance Rules (Categories: Safety, Environmental, Equipment, Labour, Documentation, Emergency preparedness, Operational compliance)
     compliance_rules_seed = [
