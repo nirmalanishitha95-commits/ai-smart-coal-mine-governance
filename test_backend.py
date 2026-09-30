@@ -217,12 +217,31 @@ def test_full_system():
     assert isinstance(teams, list)
     print(f"Rescue Teams OK: {len(teams)} rescue squads active")
 
-    # 11.3 Workers
+    # 11.3 Workers & In-Danger Safety Workflow
     r = client.get("/api/workers", headers=admin_headers)
     assert r.status_code == 200
     workers = r.json()
     assert isinstance(workers, list)
     print(f"Workers Monitored OK: {len(workers)} miners registered (DEMO WORKER LOCATION)")
+
+    # 11.3b Workers in Danger
+    r_danger = client.get("/api/workers/in-danger", headers=admin_headers)
+    assert r_danger.status_code == 200
+    danger_workers = r_danger.json()
+    assert isinstance(danger_workers, list)
+    print(f"Workers in Danger OK: {len(danger_workers)} dangerous workers identified with hazards & locations")
+    if len(danger_workers) > 0:
+        sample = danger_workers[0]
+        assert "worker_code" in sample and "current_hazard" in sample and "last_known_location" in sample
+        assert "emergency_status" in sample and "rescue_timeline" in sample
+        print(f"   Worker in Danger: {sample['name']} ({sample['worker_code']}) in {sample['assigned_zone']} | Hazard: {sample['current_hazard']}")
+
+        # Test execute rescue action
+        r_rescue = client.post(f"/api/workers/{sample['id']}/rescue", json={"notes": "Automated test extraction"}, headers=admin_headers)
+        assert r_rescue.status_code == 200
+        res_payload = r_rescue.json()
+        assert res_payload["worker"]["safety_status"] == "RESCUED"
+        print(f"   Rescue Execution OK: {res_payload['message']}")
 
     # 11.4 Underground Zones
     r = client.get("/api/zones", headers=admin_headers)

@@ -5,6 +5,7 @@ import {
   MapPin, ShieldAlert, ArrowRightLeft
 } from "lucide-react";
 import { workerService, mineService } from "../services/api";
+import WorkersInDangerSection from "../components/WorkersInDangerSection";
 
 export default function WorkersPage() {
   const [workers, setWorkers] = useState([]);
@@ -124,6 +125,9 @@ export default function WorkersPage() {
           <span className="text-[10px] text-blue-600">At fresh air base</span>
         </div>
       </div>
+
+      {/* Prominent WORKERS IN DANGER Section */}
+      <WorkersInDangerSection onRescueTriggered={fetchWorkers} />
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 text-xs">

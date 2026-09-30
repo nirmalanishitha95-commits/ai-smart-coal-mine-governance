@@ -687,22 +687,22 @@ def seed_underground_zones_if_needed(db: Session, mines: list):
 
 def seed_workers_if_needed(db: Session, mines: list):
     """Ensures at least 14 underground miners with physiological & zone awareness exist."""
-    if db.query(Worker).count() >= 12 or not mines:
+    if not mines:
         return
 
     workers_seed = [
-        ("WKR-JH-101", "Rajeshwar Oraon", "Face Miner & Cutter", "Coal Face", "Morning Shift (06:00 - 14:00)", "SAFE", 76.0, 36.7, 94.0),
-        ("WKR-JH-102", "Sunita Manjhi", "Ventilation Specialist", "Ventilation Zone", "Morning Shift (06:00 - 14:00)", "SAFE", 72.0, 36.5, 98.0),
-        ("WKR-JH-103", "Anil Soren", "HEMM Shuttle Car Operator", "Conveyor Zone", "Morning Shift (06:00 - 14:00)", "SAFE", 80.0, 36.9, 91.0),
-        ("WKR-JH-104", "Bikram Mahato", "Shotfirer & Blasting Expert", "Coal Face", "Morning Shift (06:00 - 14:00)", "IN_HAZARD_ZONE", 88.0, 37.1, 85.0),
+        ("WKR-JH-101", "Rajeshwar Oraon", "Face Miner & Cutter", "Coal Face", "Morning Shift (06:00 - 14:00)", "EMERGENCY", 108.0, 38.2, 72.0),
+        ("WKR-JH-102", "Sunita Manjhi", "Ventilation Specialist", "Ventilation Zone", "Morning Shift (06:00 - 14:00)", "AT RISK", 94.0, 37.4, 82.0),
+        ("WKR-JH-103", "Anil Soren", "HEMM Shuttle Car Operator", "Conveyor Zone", "Morning Shift (06:00 - 14:00)", "WARNING", 84.0, 37.0, 88.0),
+        ("WKR-JH-104", "Bikram Mahato", "Shotfirer & Blasting Expert", "Coal Face", "Morning Shift (06:00 - 14:00)", "EMERGENCY", 114.0, 38.6, 68.0),
         ("WKR-JH-105", "Deepak Murmu", "Strata Support & Bolter", "Tunnel", "Morning Shift (06:00 - 14:00)", "SAFE", 74.0, 36.6, 96.0),
         ("WKR-JH-106", "Arvind Mandal", "Underground Substation Electrician", "Equipment Area", "Morning Shift (06:00 - 14:00)", "SAFE", 78.0, 36.8, 93.0),
         ("WKR-JH-107", "Pramod Karmakar", "Mine Rescue Squad Lead", "Main Shaft", "Morning Shift (06:00 - 14:00)", "SAFE", 70.0, 36.4, 99.0),
-        ("WKR-JH-108", "Sitaram Hansda", "Dewatering & Pumping Operator", "Ventilation Zone", "Morning Shift (06:00 - 14:00)", "SAFE", 75.0, 36.7, 92.0),
+        ("WKR-JH-108", "Sitaram Hansda", "Dewatering & Pumping Operator", "Ventilation Zone", "Morning Shift (06:00 - 14:00)", "AT RISK", 96.0, 37.6, 79.0),
         ("WKR-CG-201", "Rameshwar Bauri", "Haulage Belt Patrol", "Conveyor Zone", "Afternoon Shift (14:00 - 22:00)", "SAFE", 77.0, 36.6, 89.0),
-        ("WKR-CG-202", "Amit Tirkey", "Underground Driller", "Coal Face", "Morning Shift (06:00 - 14:00)", "EVACUATING", 92.0, 37.2, 84.0),
+        ("WKR-CG-202", "Amit Tirkey", "Underground Driller", "Coal Face", "Morning Shift (06:00 - 14:00)", "EVACUATED", 86.0, 37.0, 85.0),
         ("WKR-MP-301", "Sanjay Yadav", "Refuge Chamber Steward", "Emergency Exit", "General Shift (08:00 - 16:00)", "SAFE", 79.0, 36.8, 97.0),
-        ("WKR-WB-401", "Manoj Baskey", "Gas Sentry & Overman", "Ventilation Zone", "Morning Shift (06:00 - 14:00)", "SAFE", 71.0, 36.5, 95.0),
+        ("WKR-WB-401", "Manoj Baskey", "Gas Sentry & Overman", "Ventilation Zone", "Morning Shift (06:00 - 14:00)", "RESCUED", 80.0, 36.9, 90.0),
         ("WKR-OD-501", "Gopal Marandi", "Continuous Miner Operator", "Coal Face", "Morning Shift (06:00 - 14:00)", "SAFE", 78.0, 36.8, 90.0),
         ("WKR-TS-601", "K. Venkateshwarlu", "Ventilation Duct Supervisor", "Tunnel", "Morning Shift (06:00 - 14:00)", "SAFE", 73.0, 36.6, 94.0)
     ]
@@ -727,6 +727,13 @@ def seed_workers_if_needed(db: Session, mines: list):
                 ))
             except Exception:
                 db.rollback()
+        else:
+            # Synchronize status to standard taxonomy
+            if existing.status in ["IN_HAZARD_ZONE", "EVACUATING", "SAFE"] and wstat in ["EMERGENCY", "AT RISK", "WARNING", "EVACUATED", "RESCUED"]:
+                existing.status = wstat
+                existing.heart_rate = hr
+                existing.body_temperature = temp
+                existing.battery_level = bat
     db.commit()
 
 def seed_rescue_teams_and_ops_if_needed(db: Session, mines: list):

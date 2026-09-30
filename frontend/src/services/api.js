@@ -217,8 +217,10 @@ export const rescueService = {
 
 export const workerService = {
   getAll: (params) => api.get("/workers", { params }),
+  getInDanger: (mineId) => api.get("/workers/in-danger", { params: { mine_id: mineId } }),
   getSummary: (mineId) => api.get("/workers/summary", { params: { mine_id: mineId } }),
-  updateStatus: (id, status) => api.put(`/workers/${id}/status?status=${encodeURIComponent(status)}`),
+  updateStatus: (id, status, zone) => api.put(`/workers/${id}/status`, { status, assigned_zone: zone }),
+  startRescue: (id, payload) => api.post(`/workers/${id}/rescue`, payload || {}),
 };
 
 export const zoneService = {

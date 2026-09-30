@@ -13,6 +13,7 @@ import {
 import { dashboardService } from "../services/api";
 import { realtimeService } from "../services/realtime";
 import RiskBadge from "../components/RiskBadge";
+import WorkersInDangerSection from "../components/WorkersInDangerSection";
 
 export default function DashboardPage() {
   const { refreshTrigger, onOpenSimulation } = useOutletContext() || {};
@@ -316,6 +317,9 @@ export default function DashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* Prominent WORKERS IN DANGER Section */}
+      <WorkersInDangerSection onRescueTriggered={fetchDashboard} />
 
       {/* 3. Main Content: Left 65% Real-Time Monitoring Table | Right 35% Critical Alerts */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
