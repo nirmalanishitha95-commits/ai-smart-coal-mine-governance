@@ -22,7 +22,7 @@ export default function LandingPage() {
           </div>
           <div>
             <span className="font-bold text-lg tracking-tight text-[#1F2937]">
-              CoalGuard <span className="text-[#1E5B3A]">AI</span>
+              AI <span className="text-[#1E5B3A]">MineSafe</span>
             </span>
             <span className="hidden sm:inline-block ml-2 px-2 py-0.5 text-[10px] font-semibold text-[#1E5B3A] bg-[#1E5B3A]/10 border border-[#1E5B3A]/20 rounded">
               SIH 2026
@@ -41,7 +41,7 @@ export default function LandingPage() {
             to="/dashboard"
             className="btn-primary text-xs !py-1.5 !px-3.5 shadow-xs"
           >
-            Launch Command Board
+            Launch Safety Dashboard
           </Link>
         </div>
       </nav>
@@ -51,16 +51,16 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto text-center space-y-5">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1E5B3A]/10 border border-[#1E5B3A]/20 text-xs font-semibold text-[#1E5B3A]">
             <span className="w-2 h-2 rounded-full bg-[#15803D] animate-pulse" />
-            AI-Powered Statutory Governance for Coal Mining Operations
+            AI-Powered Underground Mine Safety Monitoring and Rescue System
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-bold text-[#1F2937] tracking-tight leading-tight max-w-4xl mx-auto">
-            AI-Based Smart Governance & Compliance Monitoring System for{" "}
-            <span className="text-[#1E5B3A]">Coal Mines</span>
+            AI-Powered Underground Mine Safety Monitoring and{" "}
+            <span className="text-[#1E5B3A]">Rescue System</span>
           </h1>
 
           <p className="text-sm sm:text-base text-[#6B7280] max-w-2xl mx-auto leading-relaxed">
-            Bridging statutory safety compliance, multi-gas IoT sensor streams, and Isolation Forest machine learning to proactively prevent disasters and automate regulatory oversight.
+            Protecting underground miners with continuous multi-gas sensor surveillance, Isolation Forest hazard anomaly detection, real-time worker tracking, and emergency rescue mission dispatch.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
@@ -68,7 +68,7 @@ export default function LandingPage() {
               to="/dashboard"
               className="btn-primary text-sm !px-5 !py-2.5 shadow-xs"
             >
-              <span>Access National Command Board</span>
+              <span>Access Mine Safety Dashboard</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
 
@@ -89,9 +89,9 @@ export default function LandingPage() {
             <div className="w-10 h-10 rounded-md bg-[#1E5B3A]/10 text-[#1E5B3A] flex items-center justify-center">
               <Activity className="w-5 h-5" />
             </div>
-            <h3 className="card-title text-[#1F2937]">Real-Time IoT Telemetry</h3>
+            <h3 className="card-title text-[#1F2937]">Real-Time IoT & Multi-Gas Telemetry</h3>
             <p className="text-xs text-[#6B7280] leading-relaxed">
-              Continuous multi-gas monitoring of underground Methane (CH4), Carbon Monoxide, and Respirable PM10 Dust with dynamic threshold alerting.
+              Continuous monitoring of underground Methane (CH4), Carbon Monoxide (CO), Oxygen (O2), CO2, Respirable Dust, Temperature, Smoke, and Ventilation airflow.
             </p>
           </div>
 
@@ -99,9 +99,9 @@ export default function LandingPage() {
             <div className="w-10 h-10 rounded-md bg-[#1E5B3A]/10 text-[#1E5B3A] flex items-center justify-center">
               <Cpu className="w-5 h-5" />
             </div>
-            <h3 className="card-title text-[#1F2937]">Machine Learning Anomaly Engine</h3>
+            <h3 className="card-title text-[#1F2937]">Isolation Forest Hazard Engine</h3>
             <p className="text-xs text-[#6B7280] leading-relaxed">
-              Scikit-Learn Isolation Forest surveillance classifying micro-deviations before gas concentrations breach critical statutory limits.
+              Scikit-Learn anomaly detection classifies multi-gas spikes and ventilation failures, calculating explainable 0–100 risk scores before hazardous escalations.
             </p>
           </div>
 
@@ -109,9 +109,9 @@ export default function LandingPage() {
             <div className="w-10 h-10 rounded-md bg-[#1E5B3A]/10 text-[#1E5B3A] flex items-center justify-center">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <h3 className="card-title text-[#1F2937]">Closed-Loop Statutory Compliance</h3>
+            <h3 className="card-title text-[#1F2937]">Worker Safety & Rescue Management</h3>
             <p className="text-xs text-[#6B7280] leading-relaxed">
-              Digital 7-question safety audit checklists, mandatory CAPA remediation SLAs, and immutable audit logs conforming to Coal Mines Regulations, 2017.
+              Real-time worker safety tracking across underground zones, emergency incident workflows, rescue team dispatch, and evacuation coordination.
             </p>
           </div>
         </div>
@@ -119,7 +119,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="mt-auto py-6 px-6 border-t border-gray-200 bg-white text-center text-xs text-[#6B7280]">
-        CoalGuard AI · Smart India Hackathon 2026 · Ministry of Coal & DGMS Digital Governance Platform
+        AI-Powered Underground Mine Safety Monitoring and Rescue System · Smart India Hackathon 2026 · AI MineSafe
       </footer>
     </div>
   );

@@ -10,6 +10,17 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from fastapi.testclient import TestClient
 from backend.main import app
+from backend.app.database.session import engine, SessionLocal, Base
+import backend.app.models.models
+from backend.app.services.seed_service import seed_database_if_empty
+
+# Ensure all schema tables exist and are seeded
+Base.metadata.create_all(bind=engine)
+_db = SessionLocal()
+try:
+    seed_database_if_empty(_db)
+finally:
+    _db.close()
 
 client = TestClient(app)
 
@@ -23,7 +34,8 @@ def test_full_system():
     assert r.status_code == 200, f"Health failed: {r.status_code}"
     health_data = r.json()
     assert health_data["status"] == "healthy", f"Status mismatch: {health_data}"
-    assert health_data["service"] == "CoalGuard AI", f"Service mismatch: {health_data}"
+    assert health_data["service"] == "AI MineSafe", f"Service mismatch: {health_data}"
+    assert "Underground Mine Safety Monitoring and Rescue" in health_data["title"]
     print("System Health Contract Verified:", health_data)
 
     print("\n=== 2. Testing JWT Authentication for 4 Roles ===")
@@ -190,8 +202,51 @@ def test_full_system():
     assert len(safe_data["records"]) > 0
     print(f"Public DGMS Safety Indicators OK: {len(safe_data['records'])} annual national rate series (2019-2023)")
 
+    print("\n=== 11. Testing Underground Safety & Rescue Specific Endpoints ===")
+    # 11.1 Rescue operations
+    r = client.get("/api/rescue/operations", headers=admin_headers)
+    assert r.status_code == 200
+    ops = r.json()
+    assert isinstance(ops, list)
+    print(f"Rescue Operations OK: {len(ops)} operations tracked")
+
+    # 11.2 Rescue teams
+    r = client.get("/api/rescue/teams", headers=admin_headers)
+    assert r.status_code == 200
+    teams = r.json()
+    assert isinstance(teams, list)
+    print(f"Rescue Teams OK: {len(teams)} rescue squads active")
+
+    # 11.3 Workers
+    r = client.get("/api/workers", headers=admin_headers)
+    assert r.status_code == 200
+    workers = r.json()
+    assert isinstance(workers, list)
+    print(f"Workers Monitored OK: {len(workers)} miners registered (DEMO WORKER LOCATION)")
+
+    # 11.4 Underground Zones
+    r = client.get("/api/zones", headers=admin_headers)
+    assert r.status_code == 200
+    zones = r.json()
+    assert isinstance(zones, list)
+    print(f"Underground Zones OK: {len(zones)} zones monitored")
+
+    # 11.5 Active Hazards
+    r = client.get("/api/hazards", headers=admin_headers)
+    assert r.status_code == 200
+    hazards = r.json()
+    assert isinstance(hazards, list)
+    print(f"Hazard Detection OK: {len(hazards)} hazards identified")
+
+    # 11.6 Live Sensor Table Data
+    r = client.get("/api/sensors/live-table", headers=admin_headers)
+    assert r.status_code == 200
+    ltable = r.json()
+    assert isinstance(ltable, list)
+    print(f"Live Multi-Gas Sensor Table OK: {len(ltable)} mines actively telemetry-streaming")
+
     print("\n=========================================================")
-    print(">>> ALL 10 CORE TEST SUITES PASSED WITH 100% SUCCESS! <<<")
+    print(">>> ALL 11 CORE TEST SUITES PASSED WITH 100% SUCCESS! <<<")
     print("=========================================================")
 
 if __name__ == "__main__":

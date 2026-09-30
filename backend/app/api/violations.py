@@ -23,7 +23,7 @@ def get_violations(
     limit: int = Query(50, ge=1),
     db: Session = Depends(get_db)
 ):
-    query = db.query(Violation).join(Mine)
+    query = db.query(Violation).outerjoin(Mine)
 
     if mine_id:
         query = query.filter(Violation.mine_id == mine_id)
@@ -53,6 +53,11 @@ def get_violations(
             "violation_code": v.violation_code,
             "mine_id": v.mine_id,
             "mine_name": v.mine.name if v.mine else None,
+            "mine": {
+                "id": v.mine.id if v.mine else None,
+                "name": v.mine.name if v.mine else None,
+                "code": v.mine.code if v.mine else None
+            } if v.mine else None,
             "inspection_id": v.inspection_id,
             "category": v.category,
             "description": v.description,
@@ -62,7 +67,7 @@ def get_violations(
             "status": v.status,
             "due_date": v.due_date,
             "assigned_officer": v.assigned_officer,
-            "fine_amount": v.fine_amount,
+            "fine_amount": v.fine_amount or 0.0,
             "corrective_actions_count": ca_count
         })
     return result

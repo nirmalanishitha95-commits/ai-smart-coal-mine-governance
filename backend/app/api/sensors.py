@@ -349,6 +349,12 @@ def get_realtime_feed(db: Session = Depends(get_db)):
     }
 
 
+@router.get("/live-table")
+def get_live_sensor_table(db: Session = Depends(get_db)):
+    """Returns real-time multi-gas & atmospheric safety table across monitored mines."""
+    return get_live_sensor_table_data(db)
+
+
 @router.post("/trigger-tick")
 def trigger_sensor_tick(db: Session = Depends(get_db)):
     """Manually trigger a real-time sensor reading generation for demo simulation."""

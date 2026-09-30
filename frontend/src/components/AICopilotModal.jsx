@@ -11,7 +11,7 @@ export default function AICopilotModal({ isOpen, onClose }) {
     {
       role: "assistant",
       content:
-        "Hello! I am **CoalGuard Copilot**, your AI Mining Governance & DGMS Statutory Compliance Assistant powered by Groq LPU on the Render backend.\n\nHow can I assist you with **Coal Mines Regulations (CMR)**, hazard thresholds, or safety compliance today?",
+        "Hello! I am **AI MineSafe Copilot**, your expert assistant for the **AI-Powered Underground Mine Safety Monitoring and Rescue System** powered by Groq LPU on the Render backend.\n\nAsk me about hazard triggers, gas anomalies, affected worker safety, or rescue operation procedures.",
       source: "Groq AI Engine",
     },
   ]);
@@ -20,10 +20,13 @@ export default function AICopilotModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   const quickPrompts = [
-    "What are the statutory methane limits under DGMS?",
-    "What is the emergency protocol for auxiliary fan failure?",
-    "Explain the 14-step compliance governance cycle on Render.",
-    "What are the permissible effluent discharge pH standards?",
+    "Why is this mine high risk?",
+    "What caused this alert?",
+    "What hazards are active?",
+    "Which workers are affected?",
+    "What safety action is recommended?",
+    "Summarize this emergency incident.",
+    "Summarize this rescue operation.",
   ];
 
   const handleSend = async (userText) => {
@@ -56,8 +59,8 @@ export default function AICopilotModal({ isOpen, onClose }) {
         {
           role: "assistant",
           content:
-            "I encountered a temporary connection issue reaching the CoalGuard AI backend engine. The deterministic safety engine remains active. Please try asking again.",
-          source: "CoalGuard Offline Guardrail",
+            "I encountered a temporary connection issue reaching the Groq API. The deterministic safety rule engine remains active. Please try asking again.",
+          source: "AI MineSafe Offline Safety Engine",
         },
       ]);
     } finally {
@@ -76,13 +79,13 @@ export default function AICopilotModal({ isOpen, onClose }) {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-sm">CoalGuard AI Copilot</h3>
+                <h3 className="font-bold text-sm">AI MineSafe Copilot</h3>
                 <span className="px-2 py-0.2 text-[10px] font-bold bg-amber-400 text-black rounded-full uppercase tracking-wider">
                   Groq LLM
                 </span>
               </div>
               <p className="text-[11px] text-green-100">
-                Statutory Mining Governance & DGMS Compliance Intelligence
+                Underground Mine Safety Monitoring & Emergency Rescue Intelligence
               </p>
             </div>
           </div>
@@ -97,7 +100,7 @@ export default function AICopilotModal({ isOpen, onClose }) {
         {/* Quick Prompts Bar */}
         <div className="bg-gray-50 border-b border-gray-200 p-2.5 flex items-center gap-2 overflow-x-auto text-[11px] text-[#4B5563]">
           <span className="font-semibold text-gray-500 whitespace-nowrap pl-1">
-            Suggested:
+            Safety Queries:
           </span>
           {quickPrompts.map((p, idx) => (
             <button
@@ -195,8 +198,8 @@ export default function AICopilotModal({ isOpen, onClose }) {
               <span className="hidden sm:inline">Ask AI</span>
             </button>
           </form>
-          <div className="mt-1.5 text-center text-[10px] text-gray-400">
-            Groq API executes exclusively on the Render FastAPI backend • No API keys exposed to browser
+          <div className="mt-1.5 text-center text-[10px] text-gray-500">
+            AI-Assisted Risk Assessment — AI supports safety personnel and does not make final emergency, regulatory or legal decisions.
           </div>
         </div>
       </div>

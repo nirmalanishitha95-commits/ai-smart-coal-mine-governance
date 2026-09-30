@@ -25,7 +25,7 @@ def get_inspections(
     limit: int = Query(50, ge=1),
     db: Session = Depends(get_db)
 ):
-    query = db.query(Inspection).join(Mine)
+    query = db.query(Inspection).outerjoin(Mine)
 
     if mine_id:
         query = query.filter(Inspection.mine_id == mine_id)
@@ -54,8 +54,19 @@ def get_inspections(
             "id": insp.id,
             "mine_id": insp.mine_id,
             "mine_name": insp.mine.name if insp.mine else None,
+            "mine": {
+                "id": insp.mine.id if insp.mine else None,
+                "name": insp.mine.name if insp.mine else None,
+                "district": insp.mine.district if insp.mine else None,
+                "state": insp.mine.state if insp.mine else None,
+                "code": insp.mine.code if insp.mine else None
+            } if insp.mine else None,
             "inspector_id": insp.inspector_id,
             "inspector_name": insp.inspector.name if insp.inspector else "Statutory Inspector",
+            "inspector": {
+                "id": insp.inspector.id if insp.inspector else None,
+                "name": insp.inspector.name if insp.inspector else "Statutory Inspector"
+            } if insp.inspector else None,
             "inspection_type": insp.inspection_type,
             "scheduled_date": insp.scheduled_date,
             "completed_date": insp.completed_date,
@@ -89,8 +100,19 @@ def get_inspection_by_id(inspection_id: int, db: Session = Depends(get_db)):
         "id": insp.id,
         "mine_id": insp.mine_id,
         "mine_name": insp.mine.name if insp.mine else None,
+        "mine": {
+            "id": insp.mine.id if insp.mine else None,
+            "name": insp.mine.name if insp.mine else None,
+            "district": insp.mine.district if insp.mine else None,
+            "state": insp.mine.state if insp.mine else None,
+            "code": insp.mine.code if insp.mine else None
+        } if insp.mine else None,
         "inspector_id": insp.inspector_id,
         "inspector_name": insp.inspector.name if insp.inspector else "Statutory Inspector",
+        "inspector": {
+            "id": insp.inspector.id if insp.inspector else None,
+            "name": insp.inspector.name if insp.inspector else "Statutory Inspector"
+        } if insp.inspector else None,
         "inspection_type": insp.inspection_type,
         "scheduled_date": insp.scheduled_date,
         "completed_date": insp.completed_date,

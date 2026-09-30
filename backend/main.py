@@ -21,7 +21,7 @@ from fastapi.responses import JSONResponse
 
 from backend.app.config import settings
 from backend.app.database.session import engine, Base, SessionLocal
-from backend.app.services.seed_service import seed_database_if_empty
+from backend.app.services.seed_service import seed_database_if_empty, ensure_schema_migrations
 from backend.app.services.sensor_stream_service import run_sensor_simulation_loop
 from backend.app.api import api_router
 from backend.app.api.sensors import websocket_sensors_endpoint
@@ -31,6 +31,7 @@ async def lifespan(app: FastAPI):
     # Startup: Ensure all tables exist & auto-seed realistic database for Render PostgreSQL
     try:
         Base.metadata.create_all(bind=engine)
+        ensure_schema_migrations(engine)
         db = SessionLocal()
         try:
             seed_database_if_empty(db)
@@ -51,12 +52,12 @@ async def lifespan(app: FastAPI):
         await sensor_stream_task
     except asyncio.CancelledError:
         pass
-    print("CoalGuard AI backend engine gracefully shutting down.")
+    print("AI MineSafe backend engine gracefully shutting down.")
 
 app = FastAPI(
-    title="CoalGuard AI - Smart Governance and Compliance Monitoring System for Coal Mines",
-    description="AI-powered compliance, safety, and environmental monitoring for smarter and safer coal mining.",
-    version="1.0.0 (Render Production)",
+    title="AI-Powered Underground Mine Safety Monitoring and Rescue System",
+    description="AI-powered underground mine safety monitoring, hazard detection, emergency alerting and rescue assistance.",
+    version="2.0.0 (AI MineSafe)",
     lifespan=lifespan
 )
 
@@ -85,28 +86,28 @@ async def ws_sensors_route(websocket: WebSocket):
 @app.get("/")
 def root():
     return {
-        "project": "CoalGuard AI",
-        "title": "AI-Based Smart Governance and Compliance Monitoring System for Coal Mines",
-        "tagline": "AI-powered compliance, safety and environmental monitoring for smarter and safer coal mining.",
+        "project": "AI MineSafe",
+        "title": "AI-Powered Underground Mine Safety Monitoring and Rescue System",
+        "tagline": "AI-powered underground mine safety monitoring, hazard detection, emergency alerting and rescue assistance.",
         "deployment": "Render Production Cloud",
         "status": "OPERATIONAL",
         "api_docs": "/docs",
         "health_check": "/health",
-        "disclaimer": "AI-Assisted Risk Assessment - AI assists regulatory officers and does not make final legal decisions."
+        "disclaimer": "AI-Assisted Risk Assessment — AI supports safety personnel and does not make final emergency, regulatory or legal decisions."
     }
 
 @app.get("/health")
 def health_check():
     """
     Health check endpoint for Render Web Service monitoring.
-    Matches requirement: {"status": "healthy", "service": "CoalGuard AI"}.
     """
     groq_active = bool(settings.GROQ_API_KEY or os.getenv("GROQ_API_KEY"))
     return {
         "status": "healthy",
-        "service": "CoalGuard AI",
-        "ai_engine": "IsolationForest (Online)",
-        "groq_status": "Enabled (LPU Online)" if groq_active else "Fallback (Deterministic DGMS Engine)",
+        "service": "AI MineSafe",
+        "title": "AI-Powered Underground Mine Safety Monitoring and Rescue System",
+        "ai_engine": "IsolationForest & Hazard Classifier (Online)",
+        "groq_status": "Enabled (LPU Online)" if groq_active else "Fallback (Deterministic Safety Engine)",
         "database": "Connected",
         "timestamp": datetime.now(timezone.utc).isoformat()
     }

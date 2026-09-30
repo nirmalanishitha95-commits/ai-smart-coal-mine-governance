@@ -103,8 +103,8 @@ def fetch_compliance_data(
 
     return {
         "report_type": "compliance",
-        "title": "Mine Statutory Compliance Report",
-        "subtitle": "DGMS & Coal Mines Regulations Statutory Adherence Dossier",
+        "title": "Underground Mine Safety Report",
+        "subtitle": "Statutory Mine Safety Compliance, CMR 2017 & DGMS Mandatory Standards",
         "columns": columns,
         "rows": rows,
         "summary": summary,
@@ -167,8 +167,8 @@ def fetch_inspections_data(
 
     return {
         "report_type": "inspections",
-        "title": "Mine Safety & Statutory Inspection Report",
-        "subtitle": "DGMS Statutory Audits, Field Inspections & 7-Question Checklists",
+        "title": "Safety Inspection Report",
+        "subtitle": "DGMS Statutory Safety Audits, Field Inspections & 7-Point Safety Checklists",
         "columns": columns,
         "rows": rows,
         "summary": summary,
@@ -234,8 +234,8 @@ def fetch_violations_data(
 
     return {
         "report_type": "violations",
-        "title": "Mine Regulatory Violations & Penalty Notice Report",
-        "subtitle": "Statutory Breaches, Risk Severities, Corrective Notices & Penalties",
+        "title": "Hazard Detection Report",
+        "subtitle": "Detected Underground Hazards, Risk Severities & Remediation Notices",
         "columns": columns,
         "rows": rows,
         "summary": summary,
@@ -299,8 +299,8 @@ def fetch_corrective_actions_data(
 
     return {
         "report_type": "corrective_actions",
-        "title": "Corrective & Preventive Action (CAPA) Report",
-        "subtitle": "Statutory Remedial Action Plans, SLA Monitoring & Field Evidence",
+        "title": "Emergency Incident Report",
+        "subtitle": "Underground Incident Mitigation & Corrective Safety Actions",
         "columns": columns,
         "rows": rows,
         "summary": summary,
@@ -427,8 +427,8 @@ def fetch_environmental_data(
 
     return {
         "report_type": "environmental",
-        "title": "Mine Environmental & Atmospheric Monitoring Report",
-        "subtitle": "Continuous Gas Telemetry (CH4, CO), Respirable Dust & Water Quality Readings",
+        "title": "Sensor Monitoring Report",
+        "subtitle": "Multi-Gas Atmospheric Telemetry (Methane, CO, O2, Dust, Temperature, Airflow)",
         "columns": columns,
         "rows": rows,
         "summary": summary,
@@ -487,11 +487,92 @@ def fetch_risk_data(
 
     return {
         "report_type": "risk",
-        "title": "AI Risk Assessment & Mine Prioritization Report",
-        "subtitle": "Multi-Factor Mathematical Risk Attribution & Isolation Forest Surveillance",
+        "title": "AI Risk Assessment Report",
+        "subtitle": "Underground Mine Hazard Scoring, Mine Prioritization & Early Warning",
         "columns": columns,
         "rows": rows,
         "summary": summary,
+        "total_records": len(rows)
+    }
+
+
+def fetch_rescue_data(
+    db: Session,
+    mine_id: Optional[int] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    status_filter: Optional[str] = None
+) -> Dict[str, Any]:
+    from backend.app.models.models import RescueOperation
+    query = db.query(RescueOperation).outerjoin(Mine)
+    if mine_id:
+        query = query.filter(RescueOperation.mine_id == mine_id)
+    if status_filter and status_filter.strip().upper() != "ALL":
+        query = query.filter(RescueOperation.status == status_filter.strip().upper())
+
+    ops = query.order_by(desc(RescueOperation.created_at)).all()
+    rows = [
+        {
+            "id": op.id,
+            "code": op.operation_code,
+            "mine": op.mine.name if op.mine else "Colliery",
+            "title": op.title,
+            "zone": op.affected_zone,
+            "hazard_type": op.hazard_type,
+            "workers_at_risk": op.workers_at_risk,
+            "evacuated": op.evacuated_count,
+            "status": op.status,
+            "severity": op.severity,
+            "commander": op.lead_commander,
+            "created_at": op.created_at.strftime("%Y-%m-%d %H:%M") if op.created_at else "N/A"
+        }
+        for op in ops
+    ]
+    columns = ["Code", "Mine", "Title", "Zone", "Hazard", "At Risk", "Evacuated", "Status", "Severity", "Commander"]
+    return {
+        "report_type": "rescue",
+        "title": "Rescue Operation Report",
+        "subtitle": "Emergency Incident Mobilization, Worker Awareness & Extraction Tracking",
+        "columns": columns,
+        "rows": rows,
+        "summary": {
+            "Total Operations": str(len(ops)),
+            "Active / Responding": str(sum(1 for o in ops if o.status in ("ACTIVE", "RESPONDING", "RESCUE IN PROGRESS"))),
+            "Resolved Operations": str(sum(1 for o in ops if o.status == "RESOLVED"))
+        },
+        "total_records": len(rows)
+    }
+
+
+def fetch_historical_safety_data(db: Session) -> Dict[str, Any]:
+    from backend.app.services.public_dataset_service import public_dataset_service
+    accidents = public_dataset_service.get_historical_accidents_dataset()
+    records = accidents.get("records", [])
+    rows = [
+        {
+            "id": i + 1,
+            "year": str(r.get("year", "2023")),
+            "colliery": r.get("colliery_name", "N/A"),
+            "owner": r.get("owner", "N/A"),
+            "state": r.get("state", "N/A"),
+            "cause": r.get("cause_category", "N/A"),
+            "fatalities": str(r.get("fatalities", 0)),
+            "source": accidents.get("source_name", "DGMS Public Safety Records")
+        }
+        for i, r in enumerate(records)
+    ]
+    columns = ["Year", "Colliery", "Owner", "State", "Cause Category", "Fatalities", "Source"]
+    return {
+        "report_type": "historical",
+        "title": "Historical Safety Analysis Report",
+        "subtitle": "Authoritative DGMS Public Coal Mining Safety & Accident Analysis",
+        "columns": columns,
+        "rows": rows,
+        "summary": {
+            "Total Public Incident Records": str(len(rows)),
+            "Data Source": "DGMS National Safety Reports",
+            "Classification": "HISTORICAL GOVERNMENT/PUBLIC DATA"
+        },
         "total_records": len(rows)
     }
 
@@ -506,18 +587,22 @@ def get_report_dataset(
 ) -> Dict[str, Any]:
     norm_type = (report_type or "compliance").lower().replace("-", "_")
 
-    if norm_type in ("compliance", "mine_compliance_report"):
+    if norm_type in ("compliance", "mine_compliance_report", "safety", "underground_safety"):
         return fetch_compliance_data(db, mine_id, start_date, end_date, status_filter)
     elif norm_type in ("inspections", "inspection", "inspection_report"):
         return fetch_inspections_data(db, mine_id, start_date, end_date, status_filter)
-    elif norm_type in ("violations", "violation", "violation_report"):
+    elif norm_type in ("violations", "violation", "violation_report", "hazards", "hazard"):
         return fetch_violations_data(db, mine_id, start_date, end_date, status_filter)
-    elif norm_type in ("corrective_actions", "corrective-actions", "corrective_action", "corrective_action_report"):
+    elif norm_type in ("corrective_actions", "corrective-actions", "corrective_action", "incidents", "emergency_incidents"):
         return fetch_corrective_actions_data(db, mine_id, start_date, end_date, status_filter)
-    elif norm_type in ("environmental", "environmental_monitoring_report", "sensors"):
+    elif norm_type in ("environmental", "environmental_monitoring_report", "sensors", "sensor_report"):
         return fetch_environmental_data(db, mine_id, start_date, end_date, status_filter)
     elif norm_type in ("risk", "ai_risk", "ai_risk_assessment_report"):
         return fetch_risk_data(db, mine_id, status_filter)
+    elif norm_type in ("rescue", "rescue_operations", "rescue_operation_report"):
+        return fetch_rescue_data(db, mine_id, start_date, end_date, status_filter)
+    elif norm_type in ("historical", "historical_safety", "public_safety"):
+        return fetch_historical_safety_data(db)
     else:
         return fetch_compliance_data(db, mine_id, start_date, end_date, status_filter)
 
@@ -713,7 +798,7 @@ def download_pdf(
 
         date_suffix = datetime.now().strftime("%Y%m%d_%H%M")
         norm_type = (report_type or "compliance").replace("-", "_").lower()
-        filename = f"coalguard_{norm_type}_report_{date_suffix}.pdf"
+        filename = f"aiminesafe_{norm_type}_report_{date_suffix}.pdf"
 
         # Log audit action if user authenticated
         if current_user:
@@ -776,7 +861,7 @@ def download_csv(
         csv_data = output.getvalue()
         date_suffix = datetime.now().strftime("%Y%m%d_%H%M")
         norm_type = (report_type or "compliance").replace("-", "_").lower()
-        filename = f"coalguard_{norm_type}_report_{date_suffix}.csv"
+        filename = f"aiminesafe_{norm_type}_report_{date_suffix}.csv"
 
         if current_user:
             log_audit_action(

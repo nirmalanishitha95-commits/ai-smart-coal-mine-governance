@@ -17,6 +17,22 @@ def get_compliance_rules(db: Session = Depends(get_db)):
     rules = db.query(ComplianceRule).all()
     return rules
 
+@router.api_route("/init-seed", methods=["GET", "POST"])
+def trigger_seed_database(db: Session = Depends(get_db)):
+    """
+    Idempotent database seeding endpoint for production initialization.
+    Ensures all 10 demo mines, 50 compliance records, 30 violations, 25 inspections,
+    30 corrective actions, 50 alerts, and 1000 sensor readings exist.
+    """
+    from backend.app.services.seed_service import seed_database_if_empty, ensure_schema_migrations
+    ensure_schema_migrations(db.get_bind())
+    summary = seed_database_if_empty(db)
+    return {
+        "status": "success",
+        "message": "Database synchronized and seeded idempotently.",
+        "counts": summary
+    }
+
 @router.get("", response_model=List[ComplianceRecordResponse])
 def get_compliance_records(
     mine_id: Optional[int] = Query(None),
@@ -26,7 +42,7 @@ def get_compliance_records(
     limit: int = Query(100, ge=1),
     db: Session = Depends(get_db)
 ):
-    query = db.query(ComplianceRecord).join(ComplianceRule).join(Mine)
+    query = db.query(ComplianceRecord).outerjoin(ComplianceRule).outerjoin(Mine)
 
     if mine_id:
         query = query.filter(ComplianceRecord.mine_id == mine_id)
@@ -43,10 +59,24 @@ def get_compliance_records(
             "id": r.id,
             "mine_id": r.mine_id,
             "mine_name": r.mine.name if r.mine else None,
+            "mine": {
+                "id": r.mine.id if r.mine else None,
+                "name": r.mine.name if r.mine else None,
+                "code": r.mine.code if r.mine else None
+            } if r.mine else None,
             "rule_id": r.rule_id,
             "rule_code": r.rule.rule_code if r.rule else None,
             "rule_name": r.rule.rule_name if r.rule else None,
             "category": r.rule.category if r.rule else None,
+            "rule": {
+                "id": r.rule.id if r.rule else None,
+                "rule_code": r.rule.rule_code if r.rule else None,
+                "rule_name": r.rule.rule_name if r.rule else None,
+                "category": r.rule.category if r.rule else None,
+                "description": r.rule.description if r.rule else None,
+                "penalty_points": r.rule.penalty_points if r.rule else 10,
+                "mandatory": r.rule.mandatory if r.rule else True
+            } if r.rule else None,
             "status": r.status,
             "score": r.score,
             "due_date": r.due_date,

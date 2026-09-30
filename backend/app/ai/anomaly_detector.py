@@ -101,6 +101,35 @@ class SensorAnomalyDetector:
             triggers.append(f"Mine temperature critical: {vector[0][3]:.1f} C")
             is_critical = True
 
+        # Check underground life-support parameters if passed in reading
+        o2 = reading.get("oxygen")
+        if o2 is not None:
+            if o2 < 18.0:
+                triggers.append(f"Oxygen critical depletion: {o2:.1f}% (Safe: 19.5-23.5%)")
+                is_critical = True
+            elif o2 < 19.5:
+                triggers.append(f"Oxygen warning: {o2:.1f}%")
+                is_warning = True
+
+        co2 = reading.get("co2")
+        if co2 is not None and co2 > 1.0:
+            triggers.append(f"Carbon Dioxide critical: {co2:.2f}% (Limit: 1.0%)")
+            is_critical = True
+
+        smoke = reading.get("smoke")
+        if smoke is not None and smoke > 0.5:
+            triggers.append(f"Underground smoke detected: {smoke:.2f} obscuration (Fire/Combustion Risk)")
+            is_critical = True
+
+        vent = reading.get("ventilation_flow")
+        if vent is not None:
+            if vent < 10.0:
+                triggers.append(f"Ventilation flow failure: {vent:.1f} m³/min (Statutory Min: 15 m³/min)")
+                is_critical = True
+            elif vent < 15.0:
+                triggers.append(f"Ventilation flow degraded: {vent:.1f} m³/min")
+                is_warning = True
+
         if vector[0][7] < self.thresholds["water_quality"]["min"] or vector[0][7] > self.thresholds["water_quality"]["max"]:
             triggers.append(f"Water pH abnormal: {vector[0][7]:.2f} (Acid Mine Drainage risk)")
             is_warning = True

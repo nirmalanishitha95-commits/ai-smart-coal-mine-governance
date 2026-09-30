@@ -4,7 +4,7 @@ import {
   Mountain, ShieldCheck, AlertTriangle, Bell, RefreshCw, Sparkles,
   ArrowUpRight, ArrowDownRight, Activity, ChevronRight, AlertOctagon,
   Clock, CheckCircle2, AlertCircle, ExternalLink, ShieldAlert, Cpu,
-  ClipboardCheck
+  ClipboardCheck, Users, LifeBuoy, Radio
 } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
@@ -86,23 +86,24 @@ export default function DashboardPage() {
     );
   }
 
-  // 4 Core KPIs as specified in Section 3
+  // 4 Core KPIs as specified in requirements:
+  // Active Underground Mines | Workers Monitored | Active Hazards | Critical Alerts
   const activeMinesVal = data?.kpis?.active_mines?.value ?? data?.total_mines ?? 10;
-  const activeMinesTrend = data?.kpis?.active_mines?.trend ?? "+2 this month";
+  const activeMinesTrend = data?.kpis?.active_mines?.trend ?? "10 Collieries Monitored";
 
-  const complianceRateVal = data?.kpis?.compliance_rate?.value ?? `${Math.round(data?.compliant_mines / (data?.total_mines || 1) * 100)}%`;
-  const complianceRateTrend = data?.kpis?.compliance_rate?.trend ?? "+3.2%";
+  const workersMonitoredVal = data?.kpis?.workers_monitored?.value ?? data?.worker_safety_status?.total_monitored ?? 148;
+  const workersMonitoredTrend = data?.kpis?.workers_monitored?.trend ?? "14 Active Shifts";
 
-  const highRiskVal = data?.kpis?.high_risk_mines?.value ?? data?.high_risk_mines ?? 3;
-  const highRiskTrend = data?.kpis?.high_risk_mines?.trend ?? `${highRiskVal} require inspection`;
+  const activeHazardsVal = data?.kpis?.active_hazards?.value ?? data?.active_hazards?.length ?? 4;
+  const activeHazardsTrend = data?.kpis?.active_hazards?.trend ?? "1 Critical Surge";
 
-  const criticalAlertsVal = data?.kpis?.critical_alerts?.value ?? data?.critical_alerts ?? 4;
-  const criticalAlertsTrend = data?.kpis?.critical_alerts?.trend ?? "1 unacknowledged";
+  const criticalAlertsVal = data?.kpis?.critical_alerts?.value ?? data?.critical_alerts_count ?? 4;
+  const criticalAlertsTrend = data?.kpis?.critical_alerts?.trend ?? "Priority Dispatch";
 
   const kpis = [
     {
       id: "active-mines",
-      title: "Active Mines",
+      title: "Active Underground Mines",
       value: activeMinesVal,
       trend: activeMinesTrend,
       description: "Operating under DGMS licenses",
@@ -112,22 +113,22 @@ export default function DashboardPage() {
       borderAccent: "border-l-4 border-l-[#1E5B3A]"
     },
     {
-      id: "compliance-rate",
-      title: "Compliance Rate",
-      value: complianceRateVal,
-      trend: complianceRateTrend,
-      description: "Fleet statutory rule adherence",
+      id: "workers-monitored",
+      title: "Workers Monitored",
+      value: workersMonitoredVal,
+      trend: workersMonitoredTrend,
+      description: "Underground beacon vitals active",
       icon: ShieldCheck,
       trendColor: "text-[#15803D]",
       iconBg: "bg-[#15803D]/10 text-[#15803D]",
       borderAccent: "border-l-4 border-l-[#15803D]"
     },
     {
-      id: "high-risk-mines",
-      title: "High-Risk Mines",
-      value: highRiskVal,
-      trend: highRiskTrend,
-      description: "Score ≥ 61 / 100 (Immediate audit)",
+      id: "active-hazards",
+      title: "Active Hazards",
+      value: activeHazardsVal,
+      trend: activeHazardsTrend,
+      description: "Atmospheric & strata hazards",
       icon: AlertTriangle,
       trendColor: "text-[#EA580C]",
       iconBg: "bg-[#EA580C]/10 text-[#EA580C]",
@@ -138,7 +139,7 @@ export default function DashboardPage() {
       title: "Critical Alerts",
       value: criticalAlertsVal,
       trend: criticalAlertsTrend,
-      description: "Priority 1 gas & safety breaches",
+      description: "Priority gas & life-safety breaches",
       icon: Bell,
       trendColor: "text-[#DC2626]",
       iconBg: "bg-[#DC2626]/10 text-[#DC2626]",
@@ -156,15 +157,15 @@ export default function DashboardPage() {
       <div className="gov-card p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="page-title text-xl sm:text-2xl font-bold text-[#1F2937]">
-              CoalGuard AI
+            <h1 className="page-title text-xl sm:text-2xl font-bold text-[#1F2937] tracking-tight">
+              AI-Powered Underground Mine Safety Monitoring and Rescue System
             </h1>
             <span className="px-2 py-0.5 text-[10px] font-semibold text-[#1E5B3A] bg-[#1E5B3A]/10 border border-[#1E5B3A]/20 rounded">
               SIH 2026
             </span>
           </div>
           <p className="text-xs text-[#6B7280] mt-0.5">
-            AI-Based Smart Governance & Compliance Monitoring System for Coal Mines
+            Real-Time Multi-Gas Surveillance, Hazard Detection, Worker Safety & Rescue Dispatch System
           </p>
         </div>
 
@@ -172,7 +173,7 @@ export default function DashboardPage() {
           {/* Live System Status */}
           <div className="flex items-center gap-2 text-xs text-[#6B7280] bg-[#F5F7FA] px-3 py-1.5 rounded-md border border-gray-200">
             <span className="w-2 h-2 rounded-full bg-[#15803D] animate-pulse" />
-            <span className="font-medium text-[#1F2937]">Live System Status:</span>
+            <span className="font-medium text-[#1F2937]">Live Telemetry:</span>
             <span>{lastSyncSeconds < 5 ? "Synced just now" : `Updated ${lastSyncSeconds}s ago`}</span>
           </div>
 
@@ -188,10 +189,10 @@ export default function DashboardPage() {
             <button
               onClick={onOpenSimulation}
               className="btn-primary text-xs"
-              title="Run 14-Step AI Governance Simulation"
+              title="Run AI Emergency Alert & Rescue Simulation"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>RUN AI RISK SIMULATION</span>
+              <span>RUN AI SAFETY SIM</span>
             </button>
           </div>
         </div>
@@ -519,7 +520,80 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 4. Second Section: Left Compliance Trend | Right Risk Distribution */}
+      {/* 4. Worker Safety Status & Rescue Operations */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left: Underground Worker Safety Tracking */}
+        <div className="gov-card flex flex-col">
+          <div className="gov-card-header">
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-emerald-700" />
+              <h3 className="card-title text-[#1F2937]">Worker Safety Status</h3>
+            </div>
+            <Link to="/workers" className="text-xs text-[#1E5B3A] font-semibold hover:underline">
+              View All Workers ({workersMonitoredVal})
+            </Link>
+          </div>
+          <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+            <div className="grid grid-cols-4 gap-2 text-center text-xs">
+              <div className="p-2.5 rounded bg-emerald-50 border border-emerald-200">
+                <span className="text-[10px] text-gray-500 font-semibold block uppercase">Safe</span>
+                <span className="text-lg font-bold text-emerald-700">{data?.worker_safety_status?.safe ?? 136}</span>
+              </div>
+              <div className="p-2.5 rounded bg-amber-50 border border-amber-200">
+                <span className="text-[10px] text-gray-500 font-semibold block uppercase">Warning</span>
+                <span className="text-lg font-bold text-amber-700">{data?.worker_safety_status?.warning ?? 6}</span>
+              </div>
+              <div className="p-2.5 rounded bg-orange-50 border border-orange-200">
+                <span className="text-[10px] text-gray-500 font-semibold block uppercase">At Risk</span>
+                <span className="text-lg font-bold text-orange-700">{data?.worker_safety_status?.at_risk ?? 4}</span>
+              </div>
+              <div className="p-2.5 rounded bg-red-50 border border-red-200">
+                <span className="text-[10px] text-gray-500 font-semibold block uppercase">Emergency</span>
+                <span className="text-lg font-bold text-red-700 animate-pulse">{data?.worker_safety_status?.emergency ?? 2}</span>
+              </div>
+            </div>
+            <div className="pt-2 text-[11px] text-gray-500 flex items-center justify-between border-t border-gray-100">
+              <span>Location Tracking: <strong className="text-amber-800">DEMO WORKER LOCATION</strong></span>
+              <span className="text-emerald-700 font-medium">Underground Beacons Synced</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Active Rescue Operations */}
+        <div className="gov-card flex flex-col">
+          <div className="gov-card-header">
+            <div className="flex items-center gap-2">
+              <LifeBuoy className="w-4 h-4 text-red-600" />
+              <h3 className="card-title text-[#1F2937]">Active Rescue Operations</h3>
+            </div>
+            <Link to="/rescue" className="text-xs text-[#1E5B3A] font-semibold hover:underline">
+              Rescue Center
+            </Link>
+          </div>
+          <div className="p-3 divide-y divide-gray-100 text-xs flex-1">
+            {(data?.rescue_operations || []).slice(0, 3).map((op) => (
+              <div key={op.id} className="py-2.5 flex items-center justify-between gap-2">
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono font-bold text-gray-900">{op.operation_code}</span>
+                    <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-red-100 text-red-800">{op.status}</span>
+                  </div>
+                  <p className="text-gray-600 text-[11px] mt-0.5">{op.incident_title}</p>
+                </div>
+                <div className="text-right text-[11px] text-gray-500">
+                  <span className="font-medium text-red-600">{op.affected_workers_count} Workers</span>
+                  <div className="text-[10px] text-gray-400">{op.target_zone}</div>
+                </div>
+              </div>
+            ))}
+            {(!data?.rescue_operations || data.rescue_operations.length === 0) && (
+              <div className="py-6 text-center text-xs text-gray-400">All rescue units standing by on ready status.</div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 5. Safety Trends & Risk Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Compliance Trend Line Chart */}
         <div className="gov-card">
@@ -780,6 +854,10 @@ export default function DashboardPage() {
             <span>View Full Analysis</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </Link>
+        </div>
+
+        <div className="mt-3 pt-2 text-[10px] text-gray-400 border-t border-gray-100 text-center italic">
+          AI-Assisted Risk Assessment — AI supports safety personnel and does not make final emergency, regulatory or legal decisions.
         </div>
       </div>
     </div>

@@ -67,24 +67,34 @@ class DemoSimulatedSensorProvider(BaseSensorProvider):
         zone = random.choice(zones)
 
         if is_spike_cycle:
-            # Generate elevated gas or dust
-            methane = round(random.uniform(2.2, 3.8), 2)
-            co = round(random.uniform(45.0, 75.0), 1)
-            dust = round(random.uniform(180.0, 320.0), 1)
-            temperature = round(random.uniform(36.0, 41.5), 1)
+            # Generate elevated hazard conditions
+            methane = round(random.uniform(2.1, 3.8), 2)
+            co = round(random.uniform(48.0, 78.0), 1)
+            oxygen = round(random.uniform(16.5, 18.8), 1)
+            co2 = round(random.uniform(0.9, 1.8), 2)
+            dust = round(random.uniform(190.0, 320.0), 1)
+            temperature = round(random.uniform(37.0, 42.5), 1)
             humidity = round(random.uniform(78.0, 89.0), 1)
+            smoke = round(random.uniform(0.45, 0.85), 2)
+            pressure = round(random.uniform(96.0, 99.5), 1)
+            ventilation_flow = round(random.uniform(6.5, 9.8), 1)
             noise = round(random.uniform(85.0, 102.0), 1)
             air_quality = round(random.uniform(190.0, 280.0), 1)
             water_quality = round(random.uniform(5.2, 6.2), 1)
         else:
             # Nominal normal operating baseline
-            methane = round(random.uniform(0.25, 0.78), 2)
-            co = round(random.uniform(8.0, 22.0), 1)
-            dust = round(random.uniform(40.0, 85.0), 1)
-            temperature = round(random.uniform(26.0, 32.5), 1)
-            humidity = round(random.uniform(55.0, 74.0), 1)
+            methane = round(random.uniform(0.25, 0.75), 2)
+            co = round(random.uniform(6.0, 18.0), 1)
+            oxygen = round(random.uniform(20.5, 21.2), 1)
+            co2 = round(random.uniform(0.04, 0.28), 2)
+            dust = round(random.uniform(35.0, 75.0), 1)
+            temperature = round(random.uniform(24.0, 29.5), 1)
+            humidity = round(random.uniform(55.0, 70.0), 1)
+            smoke = round(random.uniform(0.02, 0.12), 2)
+            pressure = round(random.uniform(101.0, 103.5), 1)
+            ventilation_flow = round(random.uniform(18.5, 24.0), 1)
             noise = round(random.uniform(65.0, 78.0), 1)
-            air_quality = round(random.uniform(50.0, 95.0), 1)
+            air_quality = round(random.uniform(50.0, 85.0), 1)
             water_quality = round(random.uniform(6.8, 7.6), 1)
 
         # Run Isolation Forest Anomaly Detection
@@ -105,9 +115,14 @@ class DemoSimulatedSensorProvider(BaseSensorProvider):
             zone=zone,
             methane=methane,
             co=co,
+            oxygen=oxygen,
+            co2=co2,
             dust=dust,
             temperature=temperature,
             humidity=humidity,
+            smoke=smoke,
+            pressure=pressure,
+            ventilation_flow=ventilation_flow,
             noise=noise,
             air_quality=air_quality,
             water_quality=water_quality,
@@ -122,7 +137,7 @@ class DemoSimulatedSensorProvider(BaseSensorProvider):
 
         anomaly_notification = None
         if analysis["is_anomaly"]:
-            alert_msg = f"[AI SENSOR ANOMALY] {mine.name} ({zone}): " + ", ".join(analysis["triggers"] or ["Statistical multi-gas anomaly detected by Isolation Forest"])
+            alert_msg = f"[UNDERGROUND HAZARD ALERT] {mine.name} ({zone}): " + ", ".join(analysis["triggers"] or ["Atmospheric multi-gas anomaly detected by Isolation Forest"])
             alert = Alert(
                 mine_id=mine.id,
                 alert_type="Critical Sensor Anomaly",
@@ -150,11 +165,11 @@ class DemoSimulatedSensorProvider(BaseSensorProvider):
                 "mine_name": mine.name,
                 "mine_id": mine.id,
                 "zone": zone,
-                "parameter": "Methane (CH4)" if methane >= 1.0 else ("Respirable Dust" if dust >= 100 else "Carbon Monoxide (CO)"),
-                "current_value": f"{methane}%" if methane >= 1.0 else (f"{dust} µg/m³" if dust >= 100 else f"{co} ppm"),
-                "normal_range": "< 1.0%" if methane >= 1.0 else ("< 100 µg/m³" if dust >= 100 else "< 25 ppm"),
-                "previous_average": "0.45%" if methane >= 1.0 else ("55 µg/m³" if dust >= 100 else "12.0 ppm"),
-                "ai_interpretation": "Abnormal statistical deviation detected by Isolation Forest multi-gas model.",
+                "parameter": "Methane (CH4)" if methane >= 1.0 else ("Oxygen (O2)" if oxygen < 19.5 else ("Ventilation Flow" if ventilation_flow < 10 else "Carbon Monoxide (CO)")),
+                "current_value": f"{methane}%" if methane >= 1.0 else (f"{oxygen}%" if oxygen < 19.5 else (f"{ventilation_flow} m³/min" if ventilation_flow < 10 else f"{co} ppm")),
+                "normal_range": "< 1.0%" if methane >= 1.0 else ("19.5 – 23.5%" if oxygen < 19.5 else ("> 15 m³/min" if ventilation_flow < 10 else "< 25 ppm")),
+                "previous_average": "0.45%" if methane >= 1.0 else ("20.9%" if oxygen < 19.5 else ("21.5 m³/min" if ventilation_flow < 10 else "12.0 ppm")),
+                "ai_interpretation": "Multi-gas underground safety condition breached. Isolation Forest outlier score: " + str(analysis["anomaly_score"]),
                 "severity": analysis["risk_flag"],
                 "timestamp": now.isoformat()
             }
@@ -167,9 +182,14 @@ class DemoSimulatedSensorProvider(BaseSensorProvider):
                 "zone": zone,
                 "methane": methane,
                 "co": co,
+                "oxygen": oxygen,
+                "co2": co2,
                 "dust": dust,
                 "temperature": temperature,
                 "humidity": humidity,
+                "smoke": smoke,
+                "pressure": pressure,
+                "ventilation_flow": ventilation_flow,
                 "noise": noise,
                 "air_quality": air_quality,
                 "water_quality": water_quality,
@@ -192,7 +212,7 @@ class FutureIoTSensorProvider(BaseSensorProvider):
         return "FutureIoTSensorProvider"
 
     def get_data_source_label(self) -> str:
-        return "DATA SOURCE: LIVE IoT"
+        return "LIVE IoT DATA"
 
     def generate_or_fetch_reading(self, db: Session) -> Dict[str, Any]:
         # Ready for MQTT subscriber integration
@@ -247,8 +267,8 @@ def set_sensor_provider(provider: BaseSensorProvider):
 
 def get_live_sensor_table_data(db: Session) -> List[Dict[str, Any]]:
     """
-    Constructs the real-time sensor parameters table across monitored mines.
-    Columns: Mine | Parameter | Current Value | Normal Range | Status | Last Updated
+    Constructs the real-time sensor parameters table across underground mines.
+    Monitors: Methane, CO, Oxygen, CO2, Temp, Humidity, Dust, Smoke, Pressure, Ventilation.
     """
     mines = db.query(Mine).all()
     table_rows = []
@@ -262,41 +282,72 @@ def get_live_sensor_table_data(db: Session) -> List[Dict[str, Any]]:
             .first()
         )
         if latest:
-            # Compute seconds ago
             seconds_ago = int((now - latest.timestamp.replace(tzinfo=timezone.utc)).total_seconds()) if latest.timestamp else 5
-            time_str = f"{seconds_ago} sec ago" if seconds_ago < 60 else f"{seconds_ago // 60} min ago"
+            time_str = f"{seconds_ago}s ago" if seconds_ago < 60 else f"{seconds_ago // 60}m ago"
 
-            # Primary parameter status
-            methane_status = "CRITICAL" if latest.methane >= 2.0 else ("WARNING" if latest.methane >= 1.0 else "NORMAL")
-            dust_status = "CRITICAL" if latest.dust >= 250 else ("WARNING" if latest.dust >= 100 else "NORMAL")
-            temp_status = "CRITICAL" if latest.temperature >= 42 else ("WARNING" if latest.temperature >= 35 else "NORMAL")
+            # Threshold classifications
+            # Methane: Normal (<1.0%) -> Warning (1.0-2.0%) -> Critical (>2.0%)
+            m_val = latest.methane or 0.4
+            methane_status = "CRITICAL" if m_val >= 2.0 else ("WARNING" if m_val >= 1.0 else "NORMAL")
 
-            composite_status = "CRITICAL" if "CRITICAL" in [methane_status, dust_status, temp_status] or latest.risk_flag == "CRITICAL" else (
-                "WARNING" if "WARNING" in [methane_status, dust_status, temp_status] or latest.risk_flag == "WARNING" else "NORMAL"
-            )
+            # CO: Normal (<25 ppm) -> Warning (25-50 ppm) -> Critical (>50 ppm)
+            co_val = latest.co or 12.0
+            co_status = "CRITICAL" if co_val >= 50.0 else ("WARNING" if co_val >= 25.0 else "NORMAL")
+
+            # Oxygen: Safe (19.5-23.5%) -> Warning (18.0-19.5%) -> Critical (<18.0%)
+            o2_val = latest.oxygen if latest.oxygen is not None else 20.9
+            oxygen_status = "CRITICAL" if o2_val < 18.0 else ("WARNING" if o2_val < 19.5 else "SAFE")
+
+            # Temperature: Normal (<30C) -> High (30-38C) -> Critical (>38C)
+            temp_val = latest.temperature or 27.5
+            temp_status = "CRITICAL" if temp_val >= 38.0 else ("HIGH" if temp_val >= 30.0 else "NORMAL")
+
+            # Dust: Normal (<100 ug/m3) -> Elevated (100-200 ug/m3) -> Critical (>200 ug/m3)
+            dust_val = latest.dust or 48.0
+            dust_status = "CRITICAL" if dust_val >= 200.0 else ("ELEVATED" if dust_val >= 100.0 else "NORMAL")
+
+            # Ventilation: Normal (>15 m3/min) -> Warning (10-15 m3/min) -> Failure (<10 m3/min)
+            vent_val = latest.ventilation_flow if latest.ventilation_flow is not None else 21.0
+            vent_status = "FAILURE" if vent_val < 10.0 else ("WARNING" if vent_val < 15.0 else "NORMAL")
+
+            # Overall status
+            if "CRITICAL" in [methane_status, co_status, oxygen_status, temp_status, dust_status] or vent_status == "FAILURE":
+                composite_status = "CRITICAL"
+            elif "WARNING" in [methane_status, co_status, oxygen_status, vent_status] or "HIGH" in [temp_status] or "ELEVATED" in [dust_status]:
+                composite_status = "WARNING"
+            else:
+                composite_status = "NORMAL"
 
             table_rows.append({
                 "mine_id": m.id,
                 "mine_name": m.name,
                 "location": f"{m.district}, {m.state}",
+                "zone": latest.zone or "Main Extraction Shaft",
                 "risk_level": m.risk_level,
                 "risk_score": m.risk_score,
-                "compliance_score": m.compliance_score,
-                "methane": latest.methane,
-                "methane_range": "0 – 1.0%",
+                "methane": m_val,
+                "methane_range": "< 1.0%",
                 "methane_status": methane_status,
-                "dust": latest.dust,
-                "dust_range": "0 – 100 µg/m³",
-                "dust_status": dust_status,
-                "temperature": latest.temperature,
-                "temp_range": "20 – 35°C",
+                "co": co_val,
+                "co_range": "< 25 ppm",
+                "co_status": co_status,
+                "oxygen": o2_val,
+                "oxygen_range": "19.5 – 23.5%",
+                "oxygen_status": oxygen_status,
+                "co2": latest.co2 if latest.co2 is not None else 0.15,
+                "temperature": temp_val,
+                "temp_range": "< 30°C",
                 "temp_status": temp_status,
-                "co": latest.co,
-                "co_range": "0 – 25 ppm",
-                "humidity": latest.humidity,
-                "humidity_range": "40 – 80%",
-                "air_quality": latest.air_quality,
-                "water_quality": latest.water_quality,
+                "humidity": latest.humidity or 65.0,
+                "dust": dust_val,
+                "dust_range": "< 100 µg/m³",
+                "dust_status": dust_status,
+                "smoke": latest.smoke if latest.smoke is not None else 0.05,
+                "pressure": latest.pressure if latest.pressure is not None else 101.3,
+                "ventilation_flow": vent_val,
+                "ventilation_range": "> 15 m³/min",
+                "ventilation_status": vent_status,
+                "air_quality": latest.air_quality or 68.0,
                 "status": composite_status,
                 "last_updated": time_str,
                 "timestamp": latest.timestamp.isoformat()
@@ -306,24 +357,32 @@ def get_live_sensor_table_data(db: Session) -> List[Dict[str, Any]]:
                 "mine_id": m.id,
                 "mine_name": m.name,
                 "location": f"{m.district}, {m.state}",
+                "zone": "Main Extraction Shaft",
                 "risk_level": m.risk_level,
                 "risk_score": m.risk_score,
-                "compliance_score": m.compliance_score,
                 "methane": 0.42,
-                "methane_range": "0 – 1.0%",
+                "methane_range": "< 1.0%",
                 "methane_status": "NORMAL",
-                "dust": 52.0,
-                "dust_range": "0 – 100 µg/m³",
-                "dust_status": "NORMAL",
-                "temperature": 28.5,
-                "temp_range": "20 – 35°C",
-                "temp_status": "NORMAL",
                 "co": 12.0,
-                "co_range": "0 – 25 ppm",
+                "co_range": "< 25 ppm",
+                "co_status": "NORMAL",
+                "oxygen": 20.9,
+                "oxygen_range": "19.5 – 23.5%",
+                "oxygen_status": "SAFE",
+                "co2": 0.12,
+                "temperature": 27.2,
+                "temp_range": "< 30°C",
+                "temp_status": "NORMAL",
                 "humidity": 65.0,
-                "humidity_range": "40 – 80%",
+                "dust": 52.0,
+                "dust_range": "< 100 µg/m³",
+                "dust_status": "NORMAL",
+                "smoke": 0.04,
+                "pressure": 101.3,
+                "ventilation_flow": 22.4,
+                "ventilation_range": "> 15 m³/min",
+                "ventilation_status": "NORMAL",
                 "air_quality": 68.0,
-                "water_quality": 7.2,
                 "status": "NORMAL",
                 "last_updated": "Just now",
                 "timestamp": now.isoformat()

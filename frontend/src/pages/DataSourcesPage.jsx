@@ -61,7 +61,7 @@ export default function DataSourcesPage() {
           <span>Statutory Data Integrity & Provenance Policy (SIH 2026)</span>
         </div>
         <p className="leading-relaxed">
-          <b>Zero Fabricated Statistics Policy:</b> CoalGuard AI strictly distinguishes between verified historical government data and simulated edge streams:
+          <b>Zero Fabricated Statistics Policy:</b> AI MineSafe strictly distinguishes between verified historical government data and simulated edge streams:
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
           <div className="bg-white/80 p-2.5 rounded border border-blue-200 flex items-start gap-2">

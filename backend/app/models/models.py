@@ -227,6 +227,11 @@ class SensorReading(Base):
     noise = Column(Float, nullable=False) # dB
     air_quality = Column(Float, nullable=False) # AQI index
     water_quality = Column(Float, nullable=False) # pH
+    oxygen = Column(Float, default=20.9) # % (Safe 19.5-23.5%, Warning 18-19.5%, Critical <18.0%)
+    co2 = Column(Float, default=0.04) # % (Normal <0.5%, Warning 0.5-1.5%, Critical >1.5%)
+    smoke = Column(Float, default=0.0) # obscuration % / m
+    pressure = Column(Float, default=101.3) # kPa
+    ventilation_flow = Column(Float, default=22.5) # m3/min (Normal >15, Warning 10-15, Failure <10)
     is_anomaly = Column(Boolean, default=False, index=True)
     anomaly_score = Column(Float, default=0.0) # Isolation forest score (-1 to 1)
     risk_flag = Column(String(30), default="NORMAL") # NORMAL, WARNING, CRITICAL, ANOMALY
@@ -404,4 +409,89 @@ class SafetyRecord(Base):
     created_at = Column(DateTime, default=utc_now)
 
     mine = relationship("Mine", back_populates="safety_records")
+
+
+class Worker(Base):
+    __tablename__ = "workers"
+
+    id = Column(Integer, primary_key=True, index=True)
+    mine_id = Column(Integer, ForeignKey("mines.id"), nullable=False)
+    worker_code = Column(String(50), unique=True, index=True, nullable=False)
+    name = Column(String(100), nullable=False)
+    role = Column(String(100), default="Underground Miner")
+    assigned_zone = Column(String(100), default="Main Shaft") # Main Shaft, Ventilation Zone, Coal Face, Conveyor Zone, Tunnel, Emergency Exit, Equipment Area
+    shift = Column(String(50), default="Morning Shift (06:00 - 14:00)")
+    status = Column(String(30), default="SAFE") # SAFE, IN_HAZARD_ZONE, EVACUATING, UNACCOUNTED
+    heart_rate = Column(Float, default=76.0) # bpm
+    body_temperature = Column(Float, default=36.8) # C
+    battery_level = Column(Float, default=95.0) # %
+    last_beacon = Column(DateTime, default=utc_now)
+    location_mode = Column(String(50), default="DEMO WORKER LOCATION")
+    created_at = Column(DateTime, default=utc_now)
+
+    mine = relationship("Mine")
+
+
+class RescueTeam(Base):
+    __tablename__ = "rescue_teams"
+
+    id = Column(Integer, primary_key=True, index=True)
+    team_code = Column(String(50), unique=True, index=True, nullable=False)
+    team_name = Column(String(100), nullable=False)
+    base_mine_id = Column(Integer, ForeignKey("mines.id"), nullable=True)
+    leader_name = Column(String(100), nullable=False)
+    member_count = Column(Integer, default=6)
+    specialization = Column(String(150), default="Underground Atmospheric Extraction & Mine Rescue")
+    equipment = Column(String(255), default="SCBA 4-Hour Closed Circuit, Thermal Camera, Multi-Gas Quad Detector, Hydraulic Jaws")
+    status = Column(String(30), default="STANDBY") # STANDBY, MOBILIZED, DEPLOYED_UNDERGROUND, ON_BREAK
+    current_zone = Column(String(100), nullable=True)
+    contact_freq = Column(String(50), default="VHF Channel 4 (Rescue Net)")
+    created_at = Column(DateTime, default=utc_now)
+
+    base_mine = relationship("Mine")
+
+
+class RescueOperation(Base):
+    __tablename__ = "rescue_operations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    operation_code = Column(String(50), unique=True, index=True, nullable=False)
+    mine_id = Column(Integer, ForeignKey("mines.id"), nullable=False)
+    incident_id = Column(Integer, ForeignKey("safety_incidents.id"), nullable=True)
+    team_id = Column(Integer, ForeignKey("rescue_teams.id"), nullable=True)
+    title = Column(String(200), nullable=False)
+    hazard_type = Column(String(100), nullable=False) # Methane Surge, CO Inundation, Roof Strata Failure, Ventilation Stall
+    affected_zone = Column(String(100), nullable=False) # Main Shaft, Ventilation Zone, Coal Face, etc.
+    workers_at_risk = Column(Integer, default=0)
+    evacuated_count = Column(Integer, default=0)
+    status = Column(String(50), default="ACTIVE") # ACTIVE, RESPONDING, RESCUE IN PROGRESS, RESOLVED
+    severity = Column(String(20), default="HIGH") # LOW, MEDIUM, HIGH, CRITICAL
+    lead_commander = Column(String(100), default="Superintendent of Mine Rescue (DGMS Certified)")
+    action_log = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=utc_now)
+    resolved_at = Column(DateTime, nullable=True)
+
+    mine = relationship("Mine")
+    team = relationship("RescueTeam")
+
+
+class Hazard(Base):
+    __tablename__ = "hazards"
+
+    id = Column(Integer, primary_key=True, index=True)
+    hazard_code = Column(String(50), unique=True, index=True, nullable=False)
+    mine_id = Column(Integer, ForeignKey("mines.id"), nullable=False)
+    zone_name = Column(String(100), nullable=False)
+    hazard_type = Column(String(100), nullable=False) # Atmospheric Gas Elevation, Strata Convergence, Thermal Heating, Ventilation Stoppage
+    severity = Column(String(20), default="HIGH") # LOW, MEDIUM, HIGH, CRITICAL
+    risk_score = Column(Float, default=72.0)
+    description = Column(Text, nullable=False)
+    recommended_action = Column(Text, nullable=False)
+    detected_by = Column(String(100), default="AI MineSafe Real-Time Engine")
+    status = Column(String(30), default="ACTIVE") # ACTIVE, MITIGATING, RESOLVED
+    detected_at = Column(DateTime, default=utc_now)
+    resolved_at = Column(DateTime, nullable=True)
+
+    mine = relationship("Mine")
+
 

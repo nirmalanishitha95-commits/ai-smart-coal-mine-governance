@@ -3,19 +3,18 @@ from typing import Dict, Any, List
 from sqlalchemy.orm import Session
 from backend.app.models.models import (
     Mine, ComplianceRecord, Violation, CorrectiveAction,
-    SensorReading, SafetyIncident, Inspection
+    SensorReading, SafetyIncident, Inspection, Hazard
 )
 
 def evaluate_mine_risk(mine_id: int, db: Session) -> Dict[str, Any]:
     """
-    Explainable Rule-Based AI-Assisted Risk Assessment Engine for Coal Mines.
+    Explainable Rule-Based AI-Assisted Risk Assessment Engine for Underground Mines.
     Evaluates:
-    - Compliance deficiency (unmet rules)
-    - Active open violations & severity weights
+    - Active underground hazards (methane, roof falls, ventilation, dust)
+    - Sensor anomaly spikes & multi-gas atmospheric breaches
+    - Open safety violations & compliance deficiencies
     - Overdue corrective actions
-    - Sensor anomaly spikes & environmental threshold breaches
-    - Safety incident frequency
-    - Inspection schedule delays
+    - Emergency incidents & safety trends
 
     Calculates score [0 - 100]:
     0-30   -> LOW (Green)
@@ -66,7 +65,25 @@ def evaluate_mine_risk(mine_id: int, db: Session) -> Dict[str, Any]:
         })
     total_score += env_impact
 
-    # 2. Open Violations Impact (Weight up to 25)
+    # Active Underground Hazards (Weight up to 25)
+    active_hazards = (
+        db.query(Hazard)
+        .filter(Hazard.mine_id == mine_id, Hazard.status == "ACTIVE")
+        .all()
+    )
+    hazard_impact = 0.0
+    if active_hazards:
+        crit_haz = [h for h in active_hazards if h.severity == "CRITICAL"]
+        high_haz = [h for h in active_hazards if h.severity == "HIGH"]
+        hazard_impact = min(25.0, (len(crit_haz) * 12.0) + (len(high_haz) * 7.0) + (len(active_hazards) * 3.0))
+        factors.append({
+            "factor": "Active Underground Hazards",
+            "impact": round(hazard_impact, 1),
+            "description": f"{len(active_hazards)} unresolved underground hazard(s) ({len(crit_haz)} Critical)"
+        })
+    total_score += hazard_impact
+
+    # 2. Open Violations Impact (Weight up to 20)
     open_violations = (
         db.query(Violation)
         .filter(Violation.mine_id == mine_id, Violation.status.in_(["OPEN", "UNDER REVIEW", "CORRECTIVE ACTION"]))

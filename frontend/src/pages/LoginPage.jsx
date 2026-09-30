@@ -16,10 +16,10 @@ export default function LoginPage() {
   const [error, setError] = useState(null);
 
   const demoAccounts = [
-    { role: "SUPER_ADMIN", label: "Super Admin", email: "admin@coalguard.gov.in", pass: "Admin@123", desc: "Coal Controller (All Mines, Rules, Audit Logs)" },
-    { role: "GOVERNMENT_OFFICER", label: "Govt Officer", email: "officer@coalguard.gov.in", pass: "Officer@123", desc: "DGMS Regional (Inspections, Violations, Verification)" },
-    { role: "MINE_MANAGER", label: "Mine Manager", email: "manager@coalguard.gov.in", pass: "Manager@123", desc: "Colliery Lead (Remediation, Evidence Submission)" },
-    { role: "INSPECTOR", label: "Statutory Inspector", email: "inspector@coalguard.gov.in", pass: "Inspector@123", desc: "Statutory Auditor (Checklists, Field Findings)" },
+    { role: "SUPER_ADMIN", label: "Super Admin", email: "admin@coalguard.gov.in", pass: "Admin@123", desc: "Mine Rescue Chief / Controller (All Mines, Zones, Operations)" },
+    { role: "GOVERNMENT_OFFICER", label: "Govt Officer", email: "officer@coalguard.gov.in", pass: "Officer@123", desc: "DGMS Safety Officer (Hazards, Incidents, Verification)" },
+    { role: "MINE_MANAGER", label: "Mine Manager", email: "manager@coalguard.gov.in", pass: "Manager@123", desc: "Colliery Safety Lead (Worker Safety, Telemetry, Rescue)" },
+    { role: "INSPECTOR", label: "Statutory Inspector", email: "inspector@coalguard.gov.in", pass: "Inspector@123", desc: "Underground Safety Auditor (Atmospheric Audits, Checklists)" },
   ];
 
   const handleSelectDemo = (account) => {
@@ -56,14 +56,14 @@ export default function LoginPage() {
         <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-[#1E5B3A] text-white shadow-xs">
           <Shield className="w-6 h-6" />
         </div>
-        <h1 className="page-title text-2xl font-bold text-[#1F2937]">
-          CoalGuard AI
+        <h1 className="page-title text-xl sm:text-2xl font-bold text-[#1F2937] tracking-tight">
+          AI-Powered Underground Mine Safety Monitoring and Rescue System
         </h1>
         <p className="text-xs text-[#6B7280]">
-          Smart Governance and Compliance Monitoring System for Coal Mines
+          Real-time multi-gas sensor surveillance, hazard detection, worker safety, and emergency rescue operations
         </p>
         <span className="inline-block px-2.5 py-0.5 text-[10px] font-semibold text-[#1E5B3A] bg-[#1E5B3A]/10 border border-[#1E5B3A]/20 rounded">
-          Smart India Hackathon 2026 · Official Portal
+          Smart India Hackathon 2026 · Official Safety Portal
         </span>
       </div>
 
@@ -169,7 +169,7 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-4 text-center text-xs text-[#6B7280]">
-          CoalGuard AI · Directorate General of Mines Safety (DGMS) Compliant
+          AI MineSafe · Directorate General of Mines Safety (DGMS) Compliant
         </div>
       </div>
     </div>

@@ -3,7 +3,8 @@ from typing import List
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "CoalGuard AI"
+    PROJECT_NAME: str = "AI MineSafe"
+    FULL_TITLE: str = "AI-Powered Underground Mine Safety Monitoring and Rescue System"
     API_V1_STR: str = "/api"
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "production")
     

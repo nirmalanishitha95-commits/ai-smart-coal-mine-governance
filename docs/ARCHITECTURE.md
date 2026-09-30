@@ -1,7 +1,7 @@
-# CoalGuard AI — System Architecture & Technical Specifications
+# AI-Powered Underground Mine Safety Monitoring and Rescue System — Architecture & Specifications
 
-> **AI-Based Smart Governance and Compliance Monitoring System for Coal Mines**  
-> *Smart India Hackathon 2026 Edition*
+> **AI-Powered Underground Mine Safety Monitoring and Rescue System**  
+> *Underground Mine Safety, Multi-Gas Telemetry, Worker Tracking & Rescue Operation Tracking*
 
 ---
 

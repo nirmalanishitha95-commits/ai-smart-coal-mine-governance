@@ -25,7 +25,7 @@ def get_corrective_actions(
     db: Session = Depends(get_db)
 ):
     now = datetime.now(timezone.utc)
-    query = db.query(CorrectiveAction).join(Violation).join(Mine)
+    query = db.query(CorrectiveAction).outerjoin(Violation).outerjoin(Mine)
 
     if mine_id:
         query = query.filter(CorrectiveAction.mine_id == mine_id)
@@ -54,8 +54,19 @@ def get_corrective_actions(
             "action_code": a.action_code,
             "violation_id": a.violation_id,
             "violation_code": a.violation.violation_code if a.violation else None,
+            "violation": {
+                "id": a.violation.id if a.violation else None,
+                "violation_code": a.violation.violation_code if a.violation else None,
+                "category": a.violation.category if a.violation else None,
+                "severity": a.violation.severity if a.violation else None
+            } if a.violation else None,
             "mine_id": a.mine_id,
             "mine_name": a.mine.name if a.mine else None,
+            "mine": {
+                "id": a.mine.id if a.mine else None,
+                "name": a.mine.name if a.mine else None,
+                "code": a.mine.code if a.mine else None
+            } if a.mine else None,
             "description": a.description,
             "assigned_person": a.assigned_person,
             "priority": a.priority,

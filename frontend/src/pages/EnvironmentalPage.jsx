@@ -75,11 +75,16 @@ export default function EnvironmentalPage() {
   };
 
   const paramConfig = {
-    methane: { name: "Methane (CH4)", unit: "%", stroke: "#DC2626", range: "0 – 1.0%", threshold: 1.0 },
-    co: { name: "Carbon Monoxide (CO)", unit: "ppm", stroke: "#D97706", range: "0 – 25 ppm", threshold: 25.0 },
-    dust: { name: "Respirable Dust (PM10)", unit: "µg/m³", stroke: "#2563EB", range: "0 – 100 µg/m³", threshold: 100.0 },
-    temperature: { name: "Ambient Temperature", unit: "°C", stroke: "#EA580C", range: "20 – 35°C", threshold: 35.0 },
-    humidity: { name: "Relative Humidity", unit: "%", stroke: "#15803D", range: "40 – 80%", threshold: 80.0 }
+    methane: { name: "Methane (CH4)", unit: "%", stroke: "#DC2626", range: "< 1.0%", threshold: 1.0 },
+    co: { name: "Carbon Monoxide (CO)", unit: "ppm", stroke: "#D97706", range: "< 25 ppm", threshold: 25.0 },
+    oxygen: { name: "Oxygen (O2)", unit: "%", stroke: "#059669", range: "19.5 – 23.5%", threshold: 19.5 },
+    ventilation: { name: "Ventilation Flow", unit: "m³/min", stroke: "#0284C7", range: "> 15 m³/min", threshold: 15.0 },
+    co2: { name: "Carbon Dioxide (CO2)", unit: "%", stroke: "#7C3AED", range: "< 0.5%", threshold: 0.5 },
+    dust: { name: "Respirable Dust (PM10)", unit: "µg/m³", stroke: "#2563EB", range: "< 100 µg/m³", threshold: 100.0 },
+    temperature: { name: "Ambient Temperature", unit: "°C", stroke: "#EA580C", range: "< 30°C", threshold: 30.0 },
+    humidity: { name: "Relative Humidity", unit: "%", stroke: "#15803D", range: "40 – 80%", threshold: 80.0 },
+    smoke: { name: "Smoke Obscuration", unit: "obs", stroke: "#4B5563", range: "< 0.2", threshold: 0.2 },
+    pressure: { name: "Barometric Pressure", unit: "kPa", stroke: "#0D9488", range: "98 – 104 kPa", threshold: 101.3 }
   };
 
   // Build the granular table rows as required by Section 8:
@@ -92,36 +97,66 @@ export default function EnvironmentalPage() {
       return;
     }
 
+    const o2Val = m.oxygen !== undefined ? m.oxygen : 20.9;
+    const ventVal = m.ventilation_flow !== undefined ? m.ventilation_flow : 21.5;
+    const co2Val = m.co2 !== undefined ? m.co2 : 0.12;
+    const smokeVal = m.smoke !== undefined ? m.smoke : 0.04;
+    const pressVal = m.pressure !== undefined ? m.pressure : 101.3;
+
     const params = [
       {
-        param: "Methane",
+        param: "Methane (CH4)",
         val: `${(m.methane || 0.42).toFixed(2)}%`,
-        range: "0 – 1.0%",
+        range: "< 1.0%",
         status: (m.methane || 0.42) >= 2.0 ? "CRITICAL" : ((m.methane || 0.42) >= 1.0 ? "WARNING" : "NORMAL")
       },
       {
-        param: "Carbon Monoxide",
+        param: "Carbon Monoxide (CO)",
         val: `${(m.co || 12.0).toFixed(1)} ppm`,
-        range: "0 – 25 ppm",
+        range: "< 25 ppm",
         status: (m.co || 12.0) >= 50.0 ? "CRITICAL" : ((m.co || 12.0) >= 25.0 ? "WARNING" : "NORMAL")
       },
       {
-        param: "Respirable Dust",
+        param: "Oxygen (O2)",
+        val: `${o2Val.toFixed(1)}%`,
+        range: "19.5 – 23.5%",
+        status: o2Val < 18.0 ? "CRITICAL" : (o2Val < 19.5 ? "WARNING" : "SAFE")
+      },
+      {
+        param: "Ventilation Airflow",
+        val: `${ventVal.toFixed(1)} m³/min`,
+        range: "> 15 m³/min",
+        status: ventVal < 10.0 ? "FAILURE" : (ventVal < 15.0 ? "WARNING" : "NORMAL")
+      },
+      {
+        param: "Carbon Dioxide (CO2)",
+        val: `${co2Val.toFixed(2)}%`,
+        range: "< 0.5%",
+        status: co2Val >= 1.0 ? "CRITICAL" : (co2Val >= 0.5 ? "WARNING" : "NORMAL")
+      },
+      {
+        param: "Respirable Dust (PM10)",
         val: `${(m.dust || 55.0).toFixed(1)} µg/m³`,
-        range: "0 – 100 µg/m³",
-        status: (m.dust || 55.0) >= 250.0 ? "CRITICAL" : ((m.dust || 55.0) >= 100.0 ? "WARNING" : "NORMAL")
+        range: "< 100 µg/m³",
+        status: (m.dust || 55.0) >= 200.0 ? "CRITICAL" : ((m.dust || 55.0) >= 100.0 ? "ELEVATED" : "NORMAL")
       },
       {
-        param: "Temperature",
+        param: "Mine Temperature",
         val: `${(m.temperature || 28.5).toFixed(1)}°C`,
-        range: "20 – 35°C",
-        status: (m.temperature || 28.5) >= 42.0 ? "CRITICAL" : ((m.temperature || 28.5) >= 35.0 ? "WARNING" : "NORMAL")
+        range: "< 30°C",
+        status: (m.temperature || 28.5) >= 38.0 ? "CRITICAL" : ((m.temperature || 28.5) >= 30.0 ? "HIGH" : "NORMAL")
       },
       {
-        param: "Air Quality Index",
-        val: `${Math.round(m.air_quality || 68)} AQI`,
-        range: "0 – 150 AQI",
-        status: (m.air_quality || 68) >= 250 ? "CRITICAL" : ((m.air_quality || 68) >= 150 ? "WARNING" : "NORMAL")
+        param: "Underground Smoke",
+        val: `${smokeVal.toFixed(2)} obs`,
+        range: "< 0.2 obs",
+        status: smokeVal >= 0.5 ? "CRITICAL" : (smokeVal >= 0.2 ? "WARNING" : "NORMAL")
+      },
+      {
+        param: "Atmospheric Pressure",
+        val: `${pressVal.toFixed(1)} kPa`,
+        range: "98 – 104 kPa",
+        status: "NORMAL"
       }
     ];
 

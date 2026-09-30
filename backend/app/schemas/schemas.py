@@ -127,6 +127,8 @@ class ComplianceRecordResponse(BaseModel):
     last_verified: Optional[datetime] = None
     evidence: Optional[str] = None
     remarks: Optional[str] = None
+    rule: Optional[Any] = None
+    mine: Optional[Any] = None
 
     class Config:
         from_attributes = True
@@ -176,8 +178,10 @@ class InspectionResponse(BaseModel):
     id: int
     mine_id: int
     mine_name: Optional[str] = None
+    mine: Optional[Any] = None
     inspector_id: Optional[int] = None
     inspector_name: Optional[str] = None
+    inspector: Optional[Any] = None
     inspection_type: str
     scheduled_date: datetime
     completed_date: Optional[datetime] = None
@@ -214,6 +218,7 @@ class ViolationResponse(BaseModel):
     violation_code: str
     mine_id: int
     mine_name: Optional[str] = None
+    mine: Optional[Any] = None
     inspection_id: Optional[int] = None
     category: str
     description: str
@@ -249,8 +254,10 @@ class CorrectiveActionResponse(BaseModel):
     action_code: Optional[str] = None
     violation_id: int
     violation_code: Optional[str] = None
+    violation: Optional[Any] = None
     mine_id: int
     mine_name: Optional[str] = None
+    mine: Optional[Any] = None
     description: str
     assigned_person: str
     priority: str
@@ -318,6 +325,7 @@ class AlertResponse(BaseModel):
     id: int
     mine_id: int
     mine_name: Optional[str] = None
+    mine: Optional[Any] = None
     alert_type: str
     severity: str
     message: str

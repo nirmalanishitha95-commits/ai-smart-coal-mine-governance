@@ -14,6 +14,10 @@ from .audit import router as audit_router
 from .simulation import router as simulation_router
 from .ai import router as ai_router
 from .data_sources import router as data_sources_router
+from .rescue import router as rescue_router
+from .workers import router as workers_router
+from .zones import router as zones_router
+from .hazards import router as hazards_router
 
 api_router = APIRouter(prefix="/api")
 
@@ -32,4 +36,8 @@ api_router.include_router(audit_router)
 api_router.include_router(simulation_router)
 api_router.include_router(ai_router)
 api_router.include_router(data_sources_router)
+api_router.include_router(rescue_router)
+api_router.include_router(workers_router)
+api_router.include_router(zones_router)
+api_router.include_router(hazards_router)
 

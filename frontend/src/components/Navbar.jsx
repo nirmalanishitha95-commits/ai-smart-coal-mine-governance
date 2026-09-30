@@ -76,14 +76,14 @@ export default function Navbar({ onOpenSimulation, onOpenCopilot, onToggleSideba
           <div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-base tracking-tight text-[#1F2937]">
-                CoalGuard <span className="text-[#1E5B3A]">AI</span>
+                AI <span className="text-[#1E5B3A]">MineSafe</span>
               </span>
               <span className="hidden md:inline-block px-1.5 py-0.5 text-[10px] font-semibold text-[#1E5B3A] bg-[#1E5B3A]/10 border border-[#1E5B3A]/20 rounded">
-                Gov Dashboard
+                Underground Mine Safety
               </span>
             </div>
             <p className="hidden lg:block text-[11px] text-[#6B7280] -mt-0.5">
-              AI-Based Smart Governance & Compliance Monitoring
+              AI-Powered Underground Mine Safety Monitoring and Rescue System
             </p>
           </div>
         </Link>
@@ -115,10 +115,10 @@ export default function Navbar({ onOpenSimulation, onOpenCopilot, onToggleSideba
         <button
           onClick={onOpenCopilot}
           className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold text-[#1E5B3A] bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 transition shadow-xs active:scale-95 cursor-pointer"
-          title="Ask CoalGuard Groq AI Copilot"
+          title="Ask AI MineSafe Safety & Rescue Copilot"
         >
           <Bot className="w-3.5 h-3.5 text-[#1E5B3A]" />
-          <span className="hidden sm:inline">AI Copilot</span>
+          <span className="hidden sm:inline">Rescue Copilot</span>
           <span className="px-1 py-0.2 text-[9px] font-bold bg-[#1E5B3A] text-white rounded">Groq</span>
         </button>
 
@@ -126,10 +126,10 @@ export default function Navbar({ onOpenSimulation, onOpenCopilot, onToggleSideba
         <button
           onClick={onOpenSimulation}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-white bg-[#1E5B3A] hover:bg-[#16462C] transition shadow-xs active:scale-95 cursor-pointer"
-          title="Run 14-step AI closed-loop governance simulation"
+          title="Run underground hazard detection and rescue simulation"
         >
           <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-          <span className="hidden sm:inline">Run AI Simulation</span>
+          <span className="hidden sm:inline">AI Safety Sim</span>
           <span className="sm:hidden">Simulate</span>
         </button>
 

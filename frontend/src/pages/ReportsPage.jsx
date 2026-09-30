@@ -29,12 +29,14 @@ export default function ReportsPage() {
   const [hasGenerated, setHasGenerated] = useState(false);
 
   const reportTypes = [
-    { id: "compliance", label: "Mine Compliance Report" },
-    { id: "inspections", label: "Inspection Report" },
-    { id: "violations", label: "Violation Report" },
-    { id: "corrective-actions", label: "Corrective Action Report" },
-    { id: "environmental", label: "Environmental Monitoring Report" },
+    { id: "compliance", label: "Underground Mine Safety Report" },
+    { id: "environmental", label: "Real-Time Sensor Report" },
+    { id: "violations", label: "Hazard Detection Report" },
+    { id: "corrective-actions", label: "Emergency Incident Report" },
+    { id: "rescue", label: "Rescue Operation Report" },
     { id: "risk", label: "AI Risk Assessment Report" },
+    { id: "inspections", label: "Safety Inspection Report" },
+    { id: "historical", label: "Historical Safety Analysis Report" },
   ];
 
   // Load initial dropdown mines and KPI stats
@@ -138,11 +140,11 @@ export default function ReportsPage() {
           <div className="flex items-center gap-2">
             <FileText className="w-6 h-6 text-[#1E5B3A]" />
             <h1 className="page-title text-xl sm:text-2xl font-bold text-[#1F2937]">
-              Project Reports
+              Underground Mine Safety & Rescue Reports
             </h1>
           </div>
           <p className="text-xs text-[#6B7280] mt-1">
-            Generate and download compliance, inspection, risk and environmental reports.
+            AI-Powered Underground Mine Safety Monitoring and Rescue System — Statutory Safety Dossiers (DGMS / CMR 2017)
           </p>
         </div>
 

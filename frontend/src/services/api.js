@@ -42,11 +42,11 @@ api.interceptors.response.use(
     }
 
     // Clean user-facing error message (never expose raw database credentials or stack traces)
-    let userMessage = "Unable to connect to CoalGuard AI server. Please try again.";
+    let userMessage = "Unable to connect to AI MineSafe server. Please try again.";
     if (!error.response) {
-      userMessage = "Unable to connect to CoalGuard AI server. Please verify your connection or try again.";
+      userMessage = "Unable to connect to AI MineSafe server. Please verify your connection or try again.";
     } else if (error.response.status >= 500) {
-      userMessage = "CoalGuard AI server is currently processing. Please try again in a few moments.";
+      userMessage = "AI MineSafe server is currently processing. Please try again in a few moments.";
     } else if (error.response.data?.detail) {
       const detail = error.response.data.detail;
       userMessage = typeof detail === "string" ? detail : (detail[0]?.msg || JSON.stringify(detail));
@@ -105,6 +105,7 @@ export const correctiveActionService = {
 export const sensorService = {
   getReadings: (params) => api.get("/sensors/readings", { params }),
   ingest: (data) => api.post("/sensors/readings", data),
+  getLiveTable: () => api.get("/sensors/live-table"),
   getEnvironmentalSummary: (params) => api.get("/sensors/environmental/summary", { params }),
 };
 
@@ -135,7 +136,7 @@ export const reportService = {
     const link = document.createElement("a");
     link.href = url;
     const disposition = res.headers["content-disposition"] || "";
-    let filename = `coalguard_${params.report_type || "report"}_${new Date().toISOString().slice(0, 10)}.pdf`;
+    let filename = `minesafe_${params.report_type || "report"}_${new Date().toISOString().slice(0, 10)}.pdf`;
     const match = disposition.match(/filename="?([^";]+)"?/);
     if (match && match[1]) filename = match[1];
     link.setAttribute("download", filename);
@@ -152,7 +153,7 @@ export const reportService = {
     const link = document.createElement("a");
     link.href = url;
     const disposition = res.headers["content-disposition"] || "";
-    let filename = `coalguard_${params.report_type || "report"}_${new Date().toISOString().slice(0, 10)}.csv`;
+    let filename = `minesafe_${params.report_type || "report"}_${new Date().toISOString().slice(0, 10)}.csv`;
     const match = disposition.match(/filename="?([^";]+)"?/);
     if (match && match[1]) filename = match[1];
     link.setAttribute("download", filename);
@@ -205,6 +206,28 @@ export const dataSourceService = {
   getProduction: (params) => api.get("/data-sources/production", { params }),
   getAccidents: (params) => api.get("/data-sources/accidents", { params }),
   getSafetyIndicators: () => api.get("/data-sources/safety-indicators"),
+};
+
+export const rescueService = {
+  getOperations: (params) => api.get("/rescue/operations", { params }),
+  updateOperationStatus: (id, status, notes) =>
+    api.put(`/rescue/operations/${id}/status?status=${encodeURIComponent(status)}&notes=${encodeURIComponent(notes || "")}`),
+  getTeams: (params) => api.get("/rescue/teams", { params }),
+};
+
+export const workerService = {
+  getAll: (params) => api.get("/workers", { params }),
+  getSummary: (mineId) => api.get("/workers/summary", { params: { mine_id: mineId } }),
+  updateStatus: (id, status) => api.put(`/workers/${id}/status?status=${encodeURIComponent(status)}`),
+};
+
+export const zoneService = {
+  getAll: (params) => api.get("/zones", { params }),
+};
+
+export const hazardService = {
+  getAll: (params) => api.get("/hazards", { params }),
+  resolve: (id, actionsTaken) => api.put(`/hazards/${id}/resolve`, { actions_taken: actionsTaken }),
 };
 
 export default api;

@@ -19,7 +19,7 @@ def get_alerts(
     limit: int = Query(50, ge=1),
     db: Session = Depends(get_db)
 ):
-    query = db.query(Alert).join(Mine)
+    query = db.query(Alert).outerjoin(Mine)
 
     if mine_id:
         query = query.filter(Alert.mine_id == mine_id)
@@ -36,6 +36,11 @@ def get_alerts(
             "id": a.id,
             "mine_id": a.mine_id,
             "mine_name": a.mine.name if a.mine else None,
+            "mine": {
+                "id": a.mine.id if a.mine else None,
+                "name": a.mine.name if a.mine else None,
+                "code": a.mine.code if a.mine else None
+            } if a.mine else None,
             "alert_type": a.alert_type,
             "severity": a.severity,
             "message": a.message,

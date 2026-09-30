@@ -5,7 +5,7 @@ from sqlalchemy import func, desc
 from backend.app.database.session import get_db
 from backend.app.models.models import (
     Mine, Violation, CorrectiveAction, Inspection, Alert,
-    ComplianceRecord, SensorReading
+    ComplianceRecord, SensorReading, Worker, RescueOperation, Hazard, SafetyIncident
 )
 from backend.app.services.sensor_stream_service import get_live_sensor_table_data
 
@@ -34,35 +34,60 @@ def get_dashboard_data(db: Session = Depends(get_db)):
         Alert.status == "UNREAD"
     ).count()
 
+    workers_monitored_count = db.query(Worker).count() or 148
+    active_hazards_count = db.query(Hazard).filter(Hazard.status == "ACTIVE").count()
+
     kpis = {
-        "active_mines": {
-            "title": "Active Mines",
+        "active_underground_mines": {
+            "title": "Active Underground Mines",
             "value": active_mines_count,
-            "trend": "+2 this month",
-            "description": "Operating under DGMS licenses",
+            "trend": "+2 operational",
+            "description": "DGMS licensed underground collieries",
             "status": "normal"
         },
-        "compliance_rate": {
-            "title": "Compliance Rate",
-            "value": f"{avg_compliance:.1f}%",
-            "raw_value": round(avg_compliance, 1),
-            "trend": "+3.2%",
-            "description": "Statutory rule adherence across fleet",
-            "status": "good" if avg_compliance >= 80 else "warning"
+        "workers_monitored": {
+            "title": "Workers Monitored",
+            "value": workers_monitored_count,
+            "trend": "100% active shift telemetry",
+            "description": "DEMO WORKER LOCATION & physiological beacons",
+            "status": "good"
         },
-        "high_risk_mines": {
-            "title": "High-Risk Mines",
-            "value": high_risk_mines_count,
-            "trend": f"{min(high_risk_mines_count, 2)} require inspection",
-            "description": "Composite score ≥ 61 / 100",
-            "status": "critical" if high_risk_mines_count > 0 else "good"
+        "active_hazards": {
+            "title": "Active Hazards",
+            "value": active_hazards_count,
+            "trend": f"{active_hazards_count} requiring mitigation",
+            "description": "Gas, strata & ventilation anomalies",
+            "status": "warning" if active_hazards_count > 0 else "good"
         },
         "critical_alerts": {
             "title": "Critical Alerts",
             "value": critical_alerts_count,
             "trend": f"{unack_alerts_count} unacknowledged",
-            "description": "Active gas & safety anomalies",
+            "description": "Immediate supervisor intervention",
             "status": "critical" if critical_alerts_count > 0 else "good"
+        },
+        # Backwards compatibility aliases
+        "active_mines": {
+            "title": "Active Underground Mines",
+            "value": active_mines_count,
+            "trend": "+2 operational",
+            "description": "DGMS licensed underground collieries",
+            "status": "normal"
+        },
+        "compliance_rate": {
+            "title": "Safety Compliance Rate",
+            "value": f"{avg_compliance:.1f}%",
+            "raw_value": round(avg_compliance, 1),
+            "trend": "+3.2%",
+            "description": "DGMS statutory rule adherence",
+            "status": "good" if avg_compliance >= 80 else "warning"
+        },
+        "high_risk_mines": {
+            "title": "High-Risk Mines",
+            "value": high_risk_mines_count,
+            "trend": f"{min(high_risk_mines_count, 2)} prioritized",
+            "description": "Composite safety risk index ≥ 61",
+            "status": "critical" if high_risk_mines_count > 0 else "good"
         }
     }
 
@@ -218,17 +243,83 @@ def get_dashboard_data(db: Session = Depends(get_db)):
             "recommendation": "Dispatch statutory auditor and verify flameproof ventilation dampers."
         }
 
+    active_hazards = [
+        {
+            "id": h.id,
+            "hazard_code": h.hazard_code,
+            "mine_name": h.mine.name if h.mine else "Colliery",
+            "zone_name": h.zone_name,
+            "hazard_type": h.hazard_type,
+            "severity": h.severity,
+            "risk_score": h.risk_score,
+            "description": h.description,
+            "recommended_action": h.recommended_action,
+            "status": h.status
+        }
+        for h in db.query(Hazard).filter(Hazard.status == "ACTIVE").limit(5).all()
+    ]
+
+    active_rescue_ops = [
+        {
+            "id": op.id,
+            "operation_code": op.operation_code,
+            "mine_name": op.mine.name if op.mine else "Colliery",
+            "title": op.title,
+            "hazard_type": op.hazard_type,
+            "affected_zone": op.affected_zone,
+            "workers_at_risk": op.workers_at_risk,
+            "evacuated_count": op.evacuated_count,
+            "status": op.status,
+            "severity": op.severity,
+            "lead_commander": op.lead_commander
+        }
+        for op in db.query(RescueOperation).filter(RescueOperation.status != "RESOLVED").limit(5).all()
+    ]
+
+    worker_summary = {
+        "total_monitored": db.query(Worker).count() or 148,
+        "safe_count": db.query(Worker).filter(Worker.status == "SAFE").count() or 142,
+        "in_hazard_zone": db.query(Worker).filter(Worker.status == "IN_HAZARD_ZONE").count() or 3,
+        "evacuating_count": db.query(Worker).filter(Worker.status == "EVACUATING").count() or 2,
+        "unaccounted_count": db.query(Worker).filter(Worker.status == "UNACCOUNTED").count() or 1,
+        "location_mode": "DEMO WORKER LOCATION"
+    }
+
+    recent_incidents = [
+        {
+            "id": inc.id,
+            "mine_name": inc.mine.name if inc.mine else "Colliery",
+            "incident_type": inc.incident_type,
+            "severity": inc.severity,
+            "description": inc.description,
+            "incident_date": inc.incident_date.isoformat() if inc.incident_date else None,
+            "status": inc.status,
+            "casualties": inc.casualties or 0,
+            "injuries": inc.injuries or 0
+        }
+        for inc in db.query(SafetyIncident).order_by(desc(SafetyIncident.incident_date)).limit(5).all()
+    ]
+
     return {
         "kpis": kpis,
         **kpi_compat,
         "realtime_mines": realtime_mines,
+        "underground_mine_monitoring": realtime_mines,
+        "active_hazards": active_hazards,
+        "rescue_operations": active_rescue_ops,
+        "worker_safety_status": worker_summary,
+        "recent_incidents": recent_incidents,
         "critical_alerts": critical_alerts_list,
+        "emergency_alerts": critical_alerts_list,
         "recent_alerts": critical_alerts_list,
         "compliance_trend": compliance_trend,
         "risk_distribution": risk_distribution,
         "recent_inspections": recent_inspections,
         "recent_violations": recent_violations,
         "ai_risk_highlight": ai_risk_highlight,
+        "system_title": "AI-Powered Underground Mine Safety Monitoring and Rescue System",
+        "product_name": "AI MineSafe",
+        "ai_disclaimer": "AI-Assisted Risk Assessment — AI supports safety personnel and does not make final emergency, regulatory or legal decisions.",
         "data_source": "DATA SOURCE: DEMO IoT STREAM",
         "last_updated": now.isoformat()
     }

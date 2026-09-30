@@ -21,6 +21,10 @@ import MineDetailPage from "./pages/MineDetailPage";
 import UsersPage from "./pages/UsersPage";
 import SettingsPage from "./pages/SettingsPage";
 import DataSourcesPage from "./pages/DataSourcesPage";
+import RescuePage from "./pages/RescuePage";
+import WorkersPage from "./pages/WorkersPage";
+import MineZonesPage from "./pages/MineZonesPage";
+import HazardDetectionPage from "./pages/HazardDetectionPage";
 
 export default function App() {
   return (
@@ -32,18 +36,25 @@ export default function App() {
           <Route path="/landing" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
 
-          {/* Authenticated Governance Platform Routes */}
+          {/* Authenticated Mine Safety & Rescue Platform Routes */}
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/monitoring" element={<EnvironmentalPage />} />
             <Route path="/mines" element={<MinesPage />} />
             <Route path="/mines/:id" element={<MineDetailPage />} />
-            <Route path="/compliance" element={<CompliancePage />} />
+            <Route path="/zones" element={<MineZonesPage />} />
+            <Route path="/workers" element={<WorkersPage />} />
+            <Route path="/sensors" element={<EnvironmentalPage />} />
+            <Route path="/hazards" element={<HazardDetectionPage />} />
+            <Route path="/risk" element={<MinesPage />} />
+            <Route path="/alerts" element={<AlertsPage />} />
+            <Route path="/incidents" element={<CorrectiveActionsPage />} />
+            <Route path="/rescue" element={<RescuePage />} />
             <Route path="/inspections" element={<InspectionsPage />} />
+            <Route path="/compliance" element={<CompliancePage />} />
             <Route path="/violations" element={<ViolationsPage />} />
             <Route path="/corrective-actions" element={<CorrectiveActionsPage />} />
             <Route path="/environmental" element={<EnvironmentalPage />} />
-            <Route path="/alerts" element={<AlertsPage />} />
             <Route path="/map" element={<MapPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
